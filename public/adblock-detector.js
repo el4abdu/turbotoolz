@@ -11,6 +11,21 @@
       const event = new CustomEvent('adBlockDetected');
       window.dispatchEvent(event);
     }
+    
+    // Block all content with CSS if ad blocker detected
+    if (!document.getElementById('adblock-blocker-style')) {
+      const style = document.createElement('style');
+      style.id = 'adblock-blocker-style';
+      style.innerHTML = `
+        body > *:not(.adblock-modal) {
+          display: none !important;
+        }
+        body {
+          overflow: hidden !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
   }
 
   // Method 1: Check for common ad script
@@ -53,7 +68,7 @@
   function checkBaitClasses() {
     const baitClasses = [
       'banner_ad', 'sponsored', 'ad-banner', 'ad-container', 
-      'ad-placeholder', 'ad-leaderboard'
+      'ad-placeholder', 'ad-leaderboard', 'adsense', 'adsbygoogle'
     ];
     
     const testDiv = document.createElement('div');
@@ -76,6 +91,24 @@
     
     document.body.removeChild(testDiv);
   }
+  
+  // Method 4: Check if our ad placeholders are hidden
+  function checkAdPlaceholders() {
+    setTimeout(function() {
+      const adPlaceholders = document.querySelectorAll('.ad-banner, .ad-sidebar, .ad-unit, .ad-zone');
+      
+      for (let i = 0; i < adPlaceholders.length; i++) {
+        const placeholder = adPlaceholders[i];
+        if (placeholder.offsetHeight === 0 || 
+            placeholder.clientHeight === 0 || 
+            getComputedStyle(placeholder).display === 'none' || 
+            getComputedStyle(placeholder).visibility === 'hidden') {
+          setDetected();
+          break;
+        }
+      }
+    }, 500); // Give more time for ad blockers to act
+  }
 
   // Wait for DOM to be ready
   if (document.readyState === 'loading') {
@@ -89,5 +122,11 @@
     checkAdScript();
     checkAdContainer();
     checkBaitClasses();
+    checkAdPlaceholders();
+    
+    // Run continuous checks
+    setInterval(function() {
+      checkAdPlaceholders();
+    }, 3000);
   }
 })(); 

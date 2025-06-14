@@ -12,17 +12,8 @@ declare global {
 
 const AdBlockDetector = () => {
   const [adBlockDetected, setAdBlockDetected] = useState(false);
-  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    // Check if localStorage is available
-    const hasLocalStorage = typeof window !== 'undefined' && window.localStorage;
-    
-    // Check if user has previously dismissed the message
-    if (hasLocalStorage && localStorage.getItem('adBlockDismissed')) {
-      return;
-    }
-
     // Load the external detector script
     const script = document.createElement('script');
     script.src = '/adblock-detector.js';
@@ -33,7 +24,6 @@ const AdBlockDetector = () => {
     const handleDetection = () => {
       if (window.adBlockDetected) {
         setAdBlockDetected(true);
-        setShowModal(true);
       }
     };
 
@@ -55,18 +45,10 @@ const AdBlockDetector = () => {
     };
   }, []);
 
-  const handleCloseModal = () => {
-    setShowModal(false);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('adBlockDismissed', 'true');
-    }
-  };
+  // No longer need to handle close or dismissal
+  // The modal will block the site until ad blocker is disabled
 
-  if (!adBlockDetected) {
-    return null;
-  }
-
-  return <AdBlockModal isOpen={showModal} onClose={handleCloseModal} />;
+  return <AdBlockModal isOpen={adBlockDetected} />;
 };
 
 export default AdBlockDetector; 

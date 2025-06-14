@@ -62,4 +62,26 @@
 
 ::-webkit-scrollbar-thumb {
   @apply bg-primary/60 rounded-full hover:bg-primary transition-colors;
+}
+
+/* Ad Blocker Modal - always visible */
+.adblock-modal {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: fixed !important;
+  z-index: 9999 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: auto !important;
+}
+
+.adblock-modal * {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 } 

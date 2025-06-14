@@ -41,6 +41,9 @@ export default function RootLayout({
         
         {/* Preload critical assets */}
         <link rel="preload" href="/logo.svg" as="image" type="image/svg+xml" />
+        
+        {/* Early ad blocker detection */}
+        <script src="/early-detector.js" async></script>
       </head>
       <body className={`${inter.className} bg-light dark:bg-dark min-h-screen`}>
         <ThemeProvider>
