@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import MotionBackground from '@/components/MotionBackground';
 import LoadingScreen from '@/components/LoadingScreen';
 import AdBlockDetector from '@/components/AdBlockDetector';
+import AdBanner from '@/components/AdBanner';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -54,6 +55,9 @@ export default function RootLayout({
           <div className="flex flex-col min-h-screen relative z-0">
             <Header />
             <main className="flex-grow pt-24">{children}</main>
+            <div className="container mx-auto px-4 py-6">
+              <AdBanner className="max-w-2xl mx-auto" />
+            </div>
             <Footer />
           </div>
           <AdBlockDetector />

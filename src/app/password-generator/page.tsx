@@ -4,6 +4,7 @@ import React from 'react';
 import Button from '@/components/Button';
 import Card from '@/components/Card';
 import Link from 'next/link';
+import AdBanner from '@/components/AdBanner';
 
 export default function PasswordGeneratorPage() {
   return (
@@ -19,6 +20,11 @@ export default function PasswordGeneratorPage() {
               <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 fade-in delay-100">
                 This feature is coming soon! We're working hard to bring you a powerful password generator.
               </p>
+            </div>
+            
+            {/* Ad Banner - Top */}
+            <div className="mb-12">
+              <AdBanner className="max-w-2xl mx-auto" />
             </div>
             
             {/* Feature Preview */}
@@ -88,6 +94,11 @@ export default function PasswordGeneratorPage() {
                 </div>
               </div>
             </Card>
+            
+            {/* Ad Banner - Middle */}
+            <div className="mb-12">
+              <AdBanner className="max-w-2xl mx-auto" />
+            </div>
             
             {/* Password Tips */}
             <Card variant="neomorphic" className="p-8 fade-in delay-300">

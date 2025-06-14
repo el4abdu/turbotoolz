@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useTheme } from '@/components/ThemeProvider';
 import AdPlaceholder from '@/components/AdPlaceholder';
+import AdBanner from '@/components/AdBanner';
 
 export default function Home() {
   const { theme } = useTheme();
@@ -109,12 +110,10 @@ export default function Home() {
         </div>
       </section>
       
-      {/* Ad Section */}
-      <section className="py-8 bg-light/30 dark:bg-dark/30 backdrop-blur-sm">
+      {/* Ad Section - First Ad Banner */}
+      <section className="py-6 bg-light/30 dark:bg-dark/30 backdrop-blur-sm">
         <div className="container mx-auto px-4">
-          <div className="flex justify-center">
-            <AdPlaceholder width="728px" height="90px" className="ad-banner" />
-          </div>
+          <AdBanner className="max-w-2xl" />
         </div>
       </section>
       
@@ -214,9 +213,9 @@ export default function Home() {
             </Card>
           </div>
           
-          {/* Sidebar Ad */}
-          <div className="mt-12 flex justify-center md:justify-end">
-            <AdPlaceholder width="300px" height="250px" className="ad-sidebar" />
+          {/* Second Ad Banner */}
+          <div className="mt-12">
+            <AdBanner className="max-w-2xl mx-auto" />
           </div>
         </div>
       </section>

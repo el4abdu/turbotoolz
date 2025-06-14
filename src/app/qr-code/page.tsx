@@ -5,6 +5,7 @@ import Header from '@/components/Header';
 import Button from '@/components/Button';
 import Card from '@/components/Card';
 import Link from 'next/link';
+import AdBanner from '@/components/AdBanner';
 
 export default function QRCodePage() {
   return (
@@ -20,6 +21,11 @@ export default function QRCodePage() {
               <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 fade-in delay-100">
                 This feature is coming soon! We're working hard to bring you a powerful QR code generator.
               </p>
+            </div>
+            
+            {/* Ad Banner - Top */}
+            <div className="mb-12">
+              <AdBanner className="max-w-2xl mx-auto" />
             </div>
             
             {/* Feature Preview */}
@@ -89,6 +95,11 @@ export default function QRCodePage() {
                 </div>
               </div>
             </Card>
+            
+            {/* Ad Banner - Middle */}
+            <div className="mb-12">
+              <AdBanner className="max-w-2xl mx-auto" />
+            </div>
             
             {/* Newsletter Signup */}
             <Card variant="neomorphic" className="p-8 text-center fade-in delay-300">
