@@ -6,6 +6,7 @@ import Card from '@/components/Card';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTheme } from '@/components/ThemeProvider';
+import AdPlaceholder from '@/components/AdPlaceholder';
 
 export default function Home() {
   const { theme } = useTheme();
@@ -108,6 +109,15 @@ export default function Home() {
         </div>
       </section>
       
+      {/* Ad Section */}
+      <section className="py-8 bg-light/30 dark:bg-dark/30 backdrop-blur-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-center">
+            <AdPlaceholder width="728px" height="90px" className="ad-banner" />
+          </div>
+        </div>
+      </section>
+      
       {/* Features Section */}
       <section className="py-20 bg-light/50 dark:bg-dark/50 backdrop-blur-sm">
         <div className="container mx-auto px-4">
@@ -202,6 +212,11 @@ export default function Home() {
                 </div>
               </div>
             </Card>
+          </div>
+          
+          {/* Sidebar Ad */}
+          <div className="mt-12 flex justify-center md:justify-end">
+            <AdPlaceholder width="300px" height="250px" className="ad-sidebar" />
           </div>
         </div>
       </section>

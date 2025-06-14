@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import MotionBackground from '@/components/MotionBackground';
 import LoadingScreen from '@/components/LoadingScreen';
+import AdBlockDetector from '@/components/AdBlockDetector';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -52,6 +53,7 @@ export default function RootLayout({
             <main className="flex-grow pt-24">{children}</main>
             <Footer />
           </div>
+          <AdBlockDetector />
         </ThemeProvider>
       </body>
     </html>
