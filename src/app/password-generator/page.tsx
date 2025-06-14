@@ -15,6 +15,19 @@ interface PasswordHistoryItem {
   userRating?: number;
 }
 
+// Password analysis interface
+interface PasswordAnalysis {
+  hasUppercase: boolean;
+  hasLowercase: boolean;
+  hasNumber: boolean;
+  hasSymbol: boolean;
+  hasCommonWord: boolean;
+  isLongEnough: boolean;
+  hasSequentialChars: boolean;
+  hasRepeatingChars: boolean;
+  score: number;
+}
+
 export default function PasswordGeneratorPage() {
   const router = useRouter();
   // Password configuration state
@@ -24,8 +37,11 @@ export default function PasswordGeneratorPage() {
   const [includeNumbers, setIncludeNumbers] = useState(true);
   const [includeSymbols, setIncludeSymbols] = useState(true);
   const [excludeSimilarChars, setExcludeSimilarChars] = useState(false);
+  const [avoidAmbiguous, setAvoidAmbiguous] = useState(false);
+  const [useEasyToRemember, setUseEasyToRemember] = useState(false);
   const [password, setPassword] = useState('');
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [passwordAnalysis, setPasswordAnalysis] = useState<PasswordAnalysis | null>(null);
   const [copied, setCopied] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   
@@ -37,6 +53,10 @@ export default function PasswordGeneratorPage() {
   const [passwordHistory, setPasswordHistory] = useState<PasswordHistoryItem[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [userRating, setUserRating] = useState<number | null>(null);
+  
+  // Advanced options
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const [showAnalysis, setShowAnalysis] = useState(false);
 
   // Character sets
   const uppercaseChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -44,6 +64,10 @@ export default function PasswordGeneratorPage() {
   const numberChars = '0123456789';
   const symbolChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
   const similarChars = 'iIlL1oO0';
+  const ambiguousChars = '{}[]()/\\\'"`~,;:.<>';
+  
+  // Common words to avoid in passwords (simplified list)
+  const commonWords = ['password', 'admin', '123456', 'welcome', 'qwerty', 'letmein'];
 
   // Load password history from localStorage on component mount
   useEffect(() => {
@@ -67,13 +91,13 @@ export default function PasswordGeneratorPage() {
     if (!isCustomMode) {
       generatePassword();
     }
-  }, [passwordLength, includeUppercase, includeLowercase, includeNumbers, includeSymbols, excludeSimilarChars, isCustomMode]);
+  }, [passwordLength, includeUppercase, includeLowercase, includeNumbers, includeSymbols, excludeSimilarChars, avoidAmbiguous, useEasyToRemember, isCustomMode]);
 
   // Update password and strength when custom password changes
   useEffect(() => {
     if (isCustomMode && customPassword) {
       setPassword(customPassword);
-      calculatePasswordStrength(customPassword);
+      analyzePassword(customPassword);
     }
   }, [customPassword, isCustomMode]);
 
@@ -111,46 +135,81 @@ export default function PasswordGeneratorPage() {
         charPool = charPool.replace(new RegExp(char, 'g'), '');
       }
     }
-
-    // Generate password
-    let newPassword = '';
-    let hasUppercase = !includeUppercase;
-    let hasLowercase = !includeLowercase;
-    let hasNumber = !includeNumbers;
-    let hasSymbol = !includeSymbols;
-
-    // First pass: ensure we have at least one of each selected type
-    if (includeUppercase) {
-      newPassword += uppercaseChars.charAt(Math.floor(Math.random() * uppercaseChars.length));
-      hasUppercase = true;
-    }
-    if (includeLowercase) {
-      newPassword += lowercaseChars.charAt(Math.floor(Math.random() * lowercaseChars.length));
-      hasLowercase = true;
-    }
-    if (includeNumbers) {
-      newPassword += numberChars.charAt(Math.floor(Math.random() * numberChars.length));
-      hasNumber = true;
-    }
-    if (includeSymbols) {
-      newPassword += symbolChars.charAt(Math.floor(Math.random() * symbolChars.length));
-      hasSymbol = true;
-    }
-
-    // Fill the rest of the password
-    while (newPassword.length < passwordLength) {
-      const randomChar = charPool.charAt(Math.floor(Math.random() * charPool.length));
-      newPassword += randomChar;
-    }
-
-    // Shuffle the password
-    newPassword = shuffleString(newPassword);
     
-    // Trim to exact length (in case we added too many chars in the first pass)
-    newPassword = newPassword.slice(0, passwordLength);
+    // Remove ambiguous characters if option is selected
+    if (avoidAmbiguous) {
+      for (const char of ambiguousChars) {
+        charPool = charPool.replace(new RegExp('\\' + char, 'g'), '');
+      }
+    }
+
+    let newPassword = '';
+    
+    // Generate an easy-to-remember password if selected
+    if (useEasyToRemember && passwordLength >= 8) {
+      // Simple pattern: word + number + symbol + word
+      const words = ['apple', 'banana', 'cherry', 'orange', 'grape', 'lemon', 'melon', 'peach', 'plum', 'mango'];
+      const word1 = words[Math.floor(Math.random() * words.length)];
+      const word2 = words[Math.floor(Math.random() * words.length)];
+      const num = Math.floor(Math.random() * 100);
+      const sym = symbolChars.charAt(Math.floor(Math.random() * symbolChars.length));
+      
+      newPassword = word1 + num + sym + word2;
+      
+      // Capitalize some letters
+      if (includeUppercase) {
+        newPassword = newPassword.charAt(0).toUpperCase() + newPassword.slice(1);
+      }
+      
+      // Trim or pad to the desired length
+      if (newPassword.length > passwordLength) {
+        newPassword = newPassword.substring(0, passwordLength);
+      } else {
+        while (newPassword.length < passwordLength) {
+          const randomChar = charPool.charAt(Math.floor(Math.random() * charPool.length));
+          newPassword += randomChar;
+        }
+      }
+    } else {
+      // Generate password with standard algorithm
+      let hasUppercase = !includeUppercase;
+      let hasLowercase = !includeLowercase;
+      let hasNumber = !includeNumbers;
+      let hasSymbol = !includeSymbols;
+
+      // First pass: ensure we have at least one of each selected type
+      if (includeUppercase) {
+        newPassword += uppercaseChars.charAt(Math.floor(Math.random() * uppercaseChars.length));
+        hasUppercase = true;
+      }
+      if (includeLowercase) {
+        newPassword += lowercaseChars.charAt(Math.floor(Math.random() * lowercaseChars.length));
+        hasLowercase = true;
+      }
+      if (includeNumbers) {
+        newPassword += numberChars.charAt(Math.floor(Math.random() * numberChars.length));
+        hasNumber = true;
+      }
+      if (includeSymbols) {
+        newPassword += symbolChars.charAt(Math.floor(Math.random() * symbolChars.length));
+        hasSymbol = true;
+      }
+
+      // Fill the rest of the password
+      while (newPassword.length < passwordLength) {
+        const randomChar = charPool.charAt(Math.floor(Math.random() * charPool.length));
+        newPassword += randomChar;
+      }
+
+      // Shuffle the password
+      newPassword = shuffleString(newPassword);
+      
+      // Trim to exact length (in case we added too many chars in the first pass)
+      newPassword = newPassword.slice(0, passwordLength);
+    }
     
     setPassword(newPassword);
-    calculatePasswordStrength(newPassword);
+    analyzePassword(newPassword);
     
     // Add to history
     addToHistory(newPassword);
@@ -181,6 +240,31 @@ export default function PasswordGeneratorPage() {
     );
   };
 
+  // Copy specific password from history
+  const copyHistoryPassword = (pwd: string) => {
+    navigator.clipboard.writeText(pwd).then(() => {
+      // You could add a visual indicator here if needed
+      alert('Password copied to clipboard!');
+    });
+  };
+
+  // Delete password from history
+  const deleteHistoryPassword = (index: number) => {
+    setPasswordHistory(prev => {
+      const newHistory = [...prev];
+      newHistory.splice(index, 1);
+      return newHistory;
+    });
+  };
+
+  // Clear all password history
+  const clearAllHistory = () => {
+    if (confirm('Are you sure you want to delete all password history?')) {
+      setPasswordHistory([]);
+      localStorage.removeItem('passwordHistory');
+    }
+  };
+
   // Fisher-Yates shuffle algorithm
   const shuffleString = (str: string): string => {
     const array = str.split('');
@@ -191,23 +275,74 @@ export default function PasswordGeneratorPage() {
     return array.join('');
   };
 
-  // Calculate password strength (0-100)
-  const calculatePasswordStrength = (pwd: string): void => {
-    let strength = 0;
+  // Analyze password strength and characteristics
+  const analyzePassword = (pwd: string): void => {
+    if (!pwd) {
+      setPasswordStrength(0);
+      setPasswordAnalysis(null);
+      return;
+    }
     
-    // Length contribution (up to 40 points)
-    strength += Math.min(40, pwd.length * 2);
-    
-    // Character variety contribution (up to 60 points)
+    // Check for various password characteristics
     const hasUpper = /[A-Z]/.test(pwd);
     const hasLower = /[a-z]/.test(pwd);
     const hasNumber = /[0-9]/.test(pwd);
     const hasSymbol = /[^A-Za-z0-9]/.test(pwd);
+    const isLongEnough = pwd.length >= 12;
     
+    // Check for sequential characters (e.g., "abc", "123")
+    const hasSequentialChars = /abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz|012|123|234|345|456|567|678|789/i.test(pwd);
+    
+    // Check for repeating characters (e.g., "aaa", "111")
+    const hasRepeatingChars = /(.)\1{2,}/.test(pwd);
+    
+    // Check if the password contains common words
+    let hasCommonWord = false;
+    for (const word of commonWords) {
+      if (pwd.toLowerCase().includes(word)) {
+        hasCommonWord = true;
+        break;
+      }
+    }
+    
+    // Calculate base strength (0-100)
+    let strength = 0;
+    
+    // Length contribution (up to 40 points)
+    strength += Math.min(40, pwd.length * 2.5);
+    
+    // Character variety contribution (up to 40 points)
     const varietyCount = [hasUpper, hasLower, hasNumber, hasSymbol].filter(Boolean).length;
-    strength += varietyCount * 15;
+    strength += varietyCount * 10;
+    
+    // Penalize for weaknesses
+    if (hasSequentialChars) strength -= 10;
+    if (hasRepeatingChars) strength -= 10;
+    if (hasCommonWord) strength -= 20;
+    
+    // Ensure strength is between 0-100
+    strength = Math.max(0, Math.min(100, strength));
+    
+    // Save analysis
+    const analysis: PasswordAnalysis = {
+      hasUppercase: hasUpper,
+      hasLowercase: hasLower,
+      hasNumber: hasNumber,
+      hasSymbol: hasSymbol,
+      hasCommonWord,
+      isLongEnough,
+      hasSequentialChars,
+      hasRepeatingChars,
+      score: strength
+    };
     
     setPasswordStrength(strength);
+    setPasswordAnalysis(analysis);
+  };
+
+  // Calculate password strength (0-100)
+  const calculatePasswordStrength = (pwd: string): void => {
+    analyzePassword(pwd);
   };
 
   // Copy password to clipboard
@@ -218,6 +353,38 @@ export default function PasswordGeneratorPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
+  };
+
+  // Export passwords to TXT file
+  const exportToGitHub = async () => {
+    // Prepare the data in text format
+    let textContent = "TurboToolz Password History\n";
+    textContent += "=============================\n\n";
+    
+    passwordHistory.forEach((item, index) => {
+      textContent += `Password ${index + 1}: ${item.password}\n`;
+      textContent += `Strength: ${item.strength}%\n`;
+      textContent += `Date: ${item.date}\n`;
+      if (item.userRating) {
+        textContent += `User Rating: ${item.userRating}/5\n`;
+      }
+      textContent += "-----------------------------\n\n";
+    });
+    
+    textContent += "Generated by TurboToolz Password Generator\n";
+    textContent += `Export Date: ${new Date().toLocaleString()}`;
+    
+    // Create and download the text file
+    const dataUri = 'data:text/plain;charset=utf-8,' + encodeURIComponent(textContent);
+    const exportFileName = 'password_history.txt';
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileName);
+    linkElement.click();
+    
+    // Show a toast or notification that the export was successful
+    alert('Password history exported successfully!');
   };
 
   // Get strength label and color
@@ -235,36 +402,6 @@ export default function PasswordGeneratorPage() {
     if (!isCustomMode) {
       setCustomPassword(password);
     }
-  };
-
-  // Export passwords to GitHub Gist
-  const exportToGitHub = async () => {
-    // This would typically require OAuth authentication with GitHub
-    // For now, we'll just show how to prepare the data
-    const exportData = {
-      passwordHistory: passwordHistory,
-      exportDate: new Date().toISOString(),
-      tool: 'TurboToolz Password Generator'
-    };
-    
-    // In a real implementation, you would:
-    // 1. Authenticate with GitHub
-    // 2. Create a gist with this data
-    // 3. Provide the user with a link to the gist
-    
-    // For now, we'll just download it as a JSON file
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = 'password_history.json';
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-    
-    // Show a toast or notification that the export was successful
-    alert('Password history exported successfully!');
   };
 
   // Make password stronger with more advanced improvements
@@ -376,7 +513,7 @@ export default function PasswordGeneratorPage() {
                 Password Generator
               </h1>
               <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 fade-in delay-100">
-                Create strong, secure passwords with our easy-to-use generator
+                Create strong, secure passwords with our powerful generator tool
               </p>
             </div>
             
@@ -619,23 +756,34 @@ export default function PasswordGeneratorPage() {
                   className="px-8"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 00-1.414-1.414L9 10.586V3a1 1 0 10-2 0v7.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
+                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
-                  Export History
+                  Export as TXT
                 </Button>
               </div>
               
               {/* Password History Toggle */}
               <div className="mb-4">
-                <button
-                  onClick={() => setShowHistory(!showHistory)}
-                  className="flex items-center text-primary hover:text-primary-dark transition-colors"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-2 transition-transform ${showHistory ? 'rotate-90' : ''}`} viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="font-medium">Password History ({passwordHistory.length})</span>
-                </button>
+                <div className="flex justify-between items-center">
+                  <button
+                    onClick={() => setShowHistory(!showHistory)}
+                    className="flex items-center text-primary hover:text-primary-dark transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-2 transition-transform ${showHistory ? 'rotate-90' : ''}`} viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                    </svg>
+                    <span className="font-medium">Password History ({passwordHistory.length})</span>
+                  </button>
+                  
+                  {passwordHistory.length > 0 && (
+                    <button
+                      onClick={clearAllHistory}
+                      className="text-sm text-red-500 hover:text-red-700 transition-colors"
+                    >
+                      Clear All
+                    </button>
+                  )}
+                </div>
               </div>
               
               {/* Password History */}
@@ -681,6 +829,28 @@ export default function PasswordGeneratorPage() {
                               )}
                               
                               <span className="text-xs text-gray-500 dark:text-gray-400">{item.date}</span>
+                              
+                              <div className="flex space-x-2">
+                                <button
+                                  onClick={() => copyHistoryPassword(item.password)}
+                                  className="p-1 text-gray-500 hover:text-primary transition-colors"
+                                  title="Copy password"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                    <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                                  </svg>
+                                </button>
+                                <button
+                                  onClick={() => deleteHistoryPassword(index)}
+                                  className="p-1 text-gray-500 hover:text-red-500 transition-colors"
+                                  title="Delete password"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                                  </svg>
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </li>
