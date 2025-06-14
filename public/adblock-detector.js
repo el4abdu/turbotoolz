@@ -1,10 +1,12 @@
 (function() {
   // Store detection result in window object
   window.adBlockDetected = false;
+  window.adBlockChecked = false;
   
   // Function to set detected flag
   function setDetected() {
     window.adBlockDetected = true;
+    window.adBlockChecked = true;
     
     // Dispatch custom event for React components to listen to
     if (typeof window.CustomEvent === 'function') {
@@ -25,6 +27,17 @@
         }
       `;
       document.head.appendChild(style);
+    }
+  }
+  
+  function setNotDetected() {
+    window.adBlockDetected = false;
+    window.adBlockChecked = true;
+    
+    // Dispatch custom event for React components to listen to
+    if (typeof window.CustomEvent === 'function') {
+      const event = new CustomEvent('adBlockNotDetected');
+      window.dispatchEvent(event);
     }
   }
 
@@ -96,6 +109,7 @@
   function checkAdPlaceholders() {
     setTimeout(function() {
       const adPlaceholders = document.querySelectorAll('.ad-banner, .ad-sidebar, .ad-unit, .ad-zone');
+      let detected = false;
       
       for (let i = 0; i < adPlaceholders.length; i++) {
         const placeholder = adPlaceholders[i];
@@ -103,9 +117,15 @@
             placeholder.clientHeight === 0 || 
             getComputedStyle(placeholder).display === 'none' || 
             getComputedStyle(placeholder).visibility === 'hidden') {
-          setDetected();
+          detected = true;
           break;
         }
+      }
+      
+      if (detected) {
+        setDetected();
+      } else if (adPlaceholders.length > 0 && !window.adBlockChecked) {
+        setNotDetected();
       }
     }, 500); // Give more time for ad blockers to act
   }
