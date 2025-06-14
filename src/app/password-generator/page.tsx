@@ -6,7 +6,6 @@ import Card from '@/components/Card';
 import Link from 'next/link';
 import AdBanner from '@/components/AdBanner';
 import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
 
 // Password history interface
 interface PasswordHistoryItem {
@@ -46,19 +45,21 @@ export default function PasswordGeneratorPage() {
   const symbolChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
   const similarChars = 'iIlL1oO0';
 
-  // Load password history from cookies on component mount
+  // Load password history from localStorage on component mount
   useEffect(() => {
-    const savedHistory = Cookies.get('passwordHistory');
-    if (savedHistory) {
-      try {
-        const parsedHistory = JSON.parse(savedHistory);
-        setPasswordHistory(parsedHistory);
-      } catch (error) {
-        console.error('Error parsing password history:', error);
+    if (typeof window !== 'undefined') {
+      const savedHistory = localStorage.getItem('passwordHistory');
+      if (savedHistory) {
+        try {
+          const parsedHistory = JSON.parse(savedHistory);
+          setPasswordHistory(parsedHistory);
+        } catch (error) {
+          console.error('Error parsing password history:', error);
+        }
       }
+      
+      generatePassword();
     }
-    
-    generatePassword();
   }, []);
 
   // Generate password on settings change
@@ -76,12 +77,12 @@ export default function PasswordGeneratorPage() {
     }
   }, [customPassword, isCustomMode]);
 
-  // Save password history to cookies when it changes
+  // Save password history to localStorage when it changes
   useEffect(() => {
-    if (passwordHistory.length > 0) {
-      // Limit history to 10 items to keep cookie size reasonable
+    if (passwordHistory.length > 0 && typeof window !== 'undefined') {
+      // Limit history to 10 items to keep localStorage size reasonable
       const limitedHistory = passwordHistory.slice(0, 10);
-      Cookies.set('passwordHistory', JSON.stringify(limitedHistory), { expires: 30 });
+      localStorage.setItem('passwordHistory', JSON.stringify(limitedHistory));
     }
   }, [passwordHistory]);
 
