@@ -1,0 +1,28 @@
+# TurboToolz Repository Structure
+
+/
+├── public/                  # Static files
+│   └── (images, icons, etc.)
+├── src/                     # Source code
+│   ├── app/                 # Next.js app directory (pages)
+│   │   ├── layout.tsx       # Root layout
+│   │   ├── page.tsx         # Home page
+│   │   ├── qr-code/         # QR Code Generator page
+│   │   │   └── page.tsx
+│   │   └── password-generator/ # Password Generator page
+│   │       └── page.tsx
+│   ├── components/          # React components
+│   │   ├── Header.tsx       # Site header with navigation
+│   │   ├── Footer.tsx       # Site footer
+│   │   └── (other components)
+│   └── styles/              # Global styles
+│       └── globals.css      # Global CSS with TailwindCSS imports
+├── .gitignore               # Git ignore file
+├── next.config.js           # Next.js configuration
+├── package.json             # Project dependencies and scripts
+├── postcss.config.js        # PostCSS configuration for TailwindCSS
+├── README.md                # Project documentation
+├── roadmap.md               # Project roadmap
+├── repository-structure.txt # This file
+├── tailwind.config.js       # TailwindCSS configuration
+└── tsconfig.json            # TypeScript configuration 

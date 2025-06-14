@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #4F46E5;
+  --secondary: #3B82F6;
+  --accent: #F59E0B;
+  --light: #F9FAFB;
+  --dark: #111827;
+  --text-light: #F9FAFB;
+  --text-dark: #1F2937;
+}
+
+@layer base {
+  body {
+    @apply bg-light dark:bg-dark text-dark dark:text-light transition-colors duration-300;
+  }
+}
+
+/* Glassmorphism */
+.glass {
+  @apply bg-white/30 dark:bg-dark/30 backdrop-blur-md border border-white/20 dark:border-dark/20;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-200 dark:bg-gray-700;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-primary/60 rounded-full hover:bg-primary transition-colors;
+} 
