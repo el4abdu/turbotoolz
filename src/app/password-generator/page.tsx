@@ -1,8 +1,6 @@
 'use client';
 
 import React from 'react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import Button from '@/components/Button';
 import Card from '@/components/Card';
 import Link from 'next/link';
@@ -10,8 +8,6 @@ import Link from 'next/link';
 export default function PasswordGeneratorPage() {
   return (
     <>
-      <Header />
-      
       <main className="pt-32 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
@@ -154,8 +150,6 @@ export default function PasswordGeneratorPage() {
           </div>
         </div>
       </main>
-      
-      <Footer />
     </>
   );
 }
