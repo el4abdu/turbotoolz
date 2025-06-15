@@ -230,6 +230,25 @@ const Header = () => {
                           New
                         </span>
                       </Link>
+                      
+                      <Link 
+                        href="/file-converter" 
+                        className={`flex items-center p-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${pathname === '/file-converter' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
+                        onClick={() => setIsToolsMenuOpen(false)}
+                      >
+                        <div className="w-8 h-8 flex items-center justify-center bg-teal-100 dark:bg-teal-900 rounded-md text-teal-500 dark:text-teal-300 mr-3">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                          </svg>
+                        </div>
+                        <div>
+                          <div className="font-medium text-dark dark:text-light">File Converter</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Convert between file formats</div>
+                        </div>
+                        <span className="ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white">
+                          New
+                        </span>
+                      </Link>
                     </div>
                     
                     <div className="border-t border-gray-200 dark:border-gray-700 p-3">
@@ -241,8 +260,8 @@ const Header = () => {
                           </svg>
                         </div>
                         <div>
-                          <div className="font-medium">File Converter</div>
-                          <div className="text-xs">Convert between file formats</div>
+                          <div className="font-medium">Data Visualizer</div>
+                          <div className="text-xs">Create charts and graphs</div>
                         </div>
                       </div>
                     </div>
@@ -414,12 +433,27 @@ const Header = () => {
                     </span>
                   </Link>
                 </li>
-                <li className="text-gray-400 dark:text-gray-500">
-                  <div className="flex items-center py-1">
+                <li>
+                  <Link 
+                    href="/file-converter" 
+                    className={`flex items-center text-dark dark:text-light hover:text-primary dark:hover:text-primary transition-colors py-1 ${pathname === '/file-converter' ? 'text-primary dark:text-primary' : ''}`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
                     </svg>
                     File Converter
+                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white">
+                      New
+                    </span>
+                  </Link>
+                </li>
+                <li className="text-gray-400 dark:text-gray-500">
+                  <div className="flex items-center py-1">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    Data Visualizer
                     <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-500 text-white">
                       Soon
                     </span>

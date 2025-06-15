@@ -10,6 +10,7 @@ import AdPlaceholder from '@/components/AdPlaceholder';
 import AdBanner from '@/components/AdBanner';
 import QRCodeIcon from '@/components/icons/QRCodeIcon';
 import PasswordIcon from '@/components/icons/PasswordIcon';
+import FileConverterIcon from '@/components/icons/FileConverterIcon';
 
 // Create a SpeedTestIcon component
 const SpeedTestIcon = ({ className = "w-6 h-6" }) => {
@@ -141,9 +142,11 @@ export default function Home() {
                           <SpeedTestIcon className="w-10 h-10 text-accent" />
                         </div>
                       </Link>
-                      <div className="bg-gray-100/30 dark:bg-gray-800/30 p-4 rounded-xl flex items-center justify-center">
-                        <p className="text-sm text-dark dark:text-light">More soon!</p>
-                      </div>
+                      <Link href="/file-converter" className="bg-teal-500/10 dark:bg-teal-500/20 p-4 rounded-xl flex items-center justify-center transform transition-transform hover:scale-105 cursor-pointer">
+                        <div className="w-16 h-16 bg-teal-500/20 dark:bg-teal-500/30 rounded-lg flex items-center justify-center">
+                          <FileConverterIcon className="w-10 h-10 text-teal-500" />
+                        </div>
+                      </Link>
                     </div>
                   </div>
                   
@@ -327,7 +330,7 @@ export default function Home() {
             <div className="flex flex-wrap justify-center gap-4">
               <Button href="/qr-code" variant="primary" size="lg" className="hover:scale-105 transition-transform">Get Started with QR Codes</Button>
               <Button href="/todo-list" variant="secondary" size="lg" className="hover:scale-105 transition-transform">Try To-Do List</Button>
-              <Button href="/calculator" variant="accent" size="lg" className="hover:scale-105 transition-transform">Try Calculator</Button>
+              <Button href="/file-converter" variant="custom" size="lg" className="hover:scale-105 transition-transform bg-teal-500 hover:bg-teal-600 text-white focus:ring-teal-500/50">Try File Converter</Button>
             </div>
           </Card>
         </div>
@@ -409,16 +412,29 @@ export default function Home() {
               </Card>
             </Link>
             
+            {/* File Converter */}
+            <Link href="/file-converter" className="group">
+              <Card variant="glass" className="h-full p-6 text-center hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-2">
+                <div className="flex flex-col items-center">
+                  <div className="w-16 h-16 bg-teal-500/20 dark:bg-teal-500/30 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <FileConverterIcon className="w-10 h-10 text-teal-500" />
+                  </div>
+                  <h3 className="text-lg font-bold text-dark dark:text-light mb-2">File Converter</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Convert between various file formats</p>
+                </div>
+              </Card>
+            </Link>
+            
             {/* Coming Soon - File Converter */}
             <div className="opacity-60">
               <Card variant="glass" className="h-full p-6 text-center">
                 <div className="flex flex-col items-center">
                   <div className="w-16 h-16 bg-gray-300/20 dark:bg-gray-700/30 rounded-xl flex items-center justify-center mb-4">
                     <svg className="w-10 h-10 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                     </svg>
                   </div>
-                  <h3 className="text-lg font-bold text-dark dark:text-light mb-2">File Converter</h3>
+                  <h3 className="text-lg font-bold text-dark dark:text-light mb-2">Data Visualizer</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Coming soon</p>
                   <span className="mt-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-500 text-white">
                     Soon
@@ -446,7 +462,7 @@ export default function Home() {
             <div className="flex flex-wrap justify-center gap-4">
               <Button href="/qr-code" variant="primary" size="lg" className="hover:scale-105 transition-transform">Get Started with QR Codes</Button>
               <Button href="/todo-list" variant="secondary" size="lg" className="hover:scale-105 transition-transform">Try To-Do List</Button>
-              <Button href="/calculator" variant="accent" size="lg" className="hover:scale-105 transition-transform">Try Calculator</Button>
+              <Button href="/file-converter" variant="custom" size="lg" className="hover:scale-105 transition-transform bg-teal-500 hover:bg-teal-600 text-white focus:ring-teal-500/50">Try File Converter</Button>
             </div>
           </Card>
         </div>
