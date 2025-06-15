@@ -5,7 +5,7 @@ interface ButtonProps {
   children: React.ReactNode;
   href?: string;
   onClick?: () => void;
-  variant?: 'primary' | 'secondary' | 'accent' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'accent' | 'ghost' | 'custom';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   fullWidth?: boolean;
@@ -40,6 +40,7 @@ const Button: React.FC<ButtonProps> = ({
     secondary: 'bg-secondary hover:bg-secondary/90 text-white focus:ring-secondary/50 shadow-lg shadow-secondary/30 hover:shadow-xl hover:shadow-secondary/40',
     accent: 'bg-accent hover:bg-accent/90 text-white focus:ring-accent/50 shadow-lg shadow-accent/30 hover:shadow-xl hover:shadow-accent/40',
     ghost: 'bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600 focus:ring-gray-400',
+    custom: '', // Empty string for custom styling via className
   };
   
   // Disabled styles
@@ -49,7 +50,7 @@ const Button: React.FC<ButtonProps> = ({
   const widthStyle = fullWidth ? 'w-full' : '';
   
   // Combined styles
-  const combinedStyles = `${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} ${widthStyle} ${disabledStyles} ${className}`;
+  const combinedStyles = `${baseStyles} ${sizeStyles[size]} ${variant !== 'custom' ? variantStyles[variant] : ''} ${widthStyle} ${disabledStyles} ${className}`;
   
   // Render as link if href is provided
   if (href) {

@@ -192,34 +192,48 @@ const Header = () => {
                           <div className="text-xs text-gray-500 dark:text-gray-400">Check your internet speed</div>
                         </div>
                       </Link>
-                    </div>
-                    
-                    <div className="border-t border-gray-200 dark:border-gray-700 p-3">
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Coming Soon</div>
-                      <div className="flex items-center p-2 rounded-md text-gray-500 dark:text-gray-400">
-                        <div className="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-md mr-3">
+                      
+                      <Link 
+                        href="/todo-list" 
+                        className={`flex items-center p-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${pathname === '/todo-list' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
+                        onClick={() => setIsToolsMenuOpen(false)}
+                      >
+                        <div className="w-8 h-8 flex items-center justify-center bg-amber-100 dark:bg-amber-900 rounded-md text-amber-500 dark:text-amber-300 mr-3">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
                           </svg>
                         </div>
                         <div>
-                          <div className="font-medium">To-Do List</div>
-                          <div className="text-xs">Manage your tasks</div>
+                          <div className="font-medium text-dark dark:text-light">To-Do List</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Manage your tasks</div>
                         </div>
-                      </div>
-
-                      <div className="flex items-center p-2 rounded-md text-gray-500 dark:text-gray-400">
-                        <div className="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-md mr-3">
+                        <span className="ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white">
+                          New
+                        </span>
+                      </Link>
+                      
+                      <Link 
+                        href="/calculator" 
+                        className={`flex items-center p-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${pathname === '/calculator' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
+                        onClick={() => setIsToolsMenuOpen(false)}
+                      >
+                        <div className="w-8 h-8 flex items-center justify-center bg-indigo-100 dark:bg-indigo-900 rounded-md text-indigo-500 dark:text-indigo-300 mr-3">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                           </svg>
                         </div>
                         <div>
-                          <div className="font-medium">Calculator</div>
-                          <div className="text-xs">Perform calculations</div>
+                          <div className="font-medium text-dark dark:text-light">Calculator</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Perform calculations</div>
                         </div>
-                      </div>
-
+                        <span className="ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white">
+                          New
+                        </span>
+                      </Link>
+                    </div>
+                    
+                    <div className="border-t border-gray-200 dark:border-gray-700 p-3">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Coming Soon</div>
                       <div className="flex items-center p-2 rounded-md text-gray-500 dark:text-gray-400">
                         <div className="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-md mr-3">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -370,27 +384,35 @@ const Header = () => {
                     Speed Test
                   </Link>
                 </li>
-                <li className="text-gray-400 dark:text-gray-500">
-                  <div className="flex items-center py-1">
+                <li>
+                  <Link 
+                    href="/todo-list" 
+                    className={`flex items-center text-dark dark:text-light hover:text-primary dark:hover:text-primary transition-colors py-1 ${pathname === '/todo-list' ? 'text-primary dark:text-primary' : ''}`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
                     </svg>
                     To-Do List
-                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-500 text-white">
-                      Soon
+                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white">
+                      New
                     </span>
-                  </div>
+                  </Link>
                 </li>
-                <li className="text-gray-400 dark:text-gray-500">
-                  <div className="flex items-center py-1">
+                <li>
+                  <Link 
+                    href="/calculator" 
+                    className={`flex items-center text-dark dark:text-light hover:text-primary dark:hover:text-primary transition-colors py-1 ${pathname === '/calculator' ? 'text-primary dark:text-primary' : ''}`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                     </svg>
                     Calculator
-                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-500 text-white">
-                      Soon
+                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white">
+                      New
                     </span>
-                  </div>
+                  </Link>
                 </li>
                 <li className="text-gray-400 dark:text-gray-500">
                   <div className="flex items-center py-1">
