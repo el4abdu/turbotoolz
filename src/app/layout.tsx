@@ -1,74 +1,80 @@
-import React from 'react';
+import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { ThemeProvider } from '@/components/ThemeProvider';
-import MotionBackground from '@/components/MotionBackground';
 import LoadingScreen from '@/components/LoadingScreen';
 import AdBlockDetector from '@/components/AdBlockDetector';
+import { ThemeProvider } from '@/components/ThemeProvider';
 import AdBanner from '@/components/AdBanner';
 import SideBanner from '@/components/SideBanner';
+import { NotificationProvider } from '@/components/NotificationContainer';
 
 const inter = Inter({ 
   subsets: ['latin'],
-  display: 'swap', // Ensure text remains visible during font loading
+  weight: ['300', '400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-inter',
 });
 
 export const metadata: Metadata = {
-  title: 'TurboToolz - Fast Web Tools',
-  description: 'Collection of useful web tools for everyday tasks',
+  title: 'TurboToolz - Online Tools for Developers and Creators',
+  description: 'A collection of free online tools for developers, designers, and content creators.',
   icons: {
     icon: [
-      { url: '/logo.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: '32x32' },
+      { url: '/icon.png', sizes: '192x192' },
     ],
-    apple: [
-      { url: '/logo.svg', type: 'image/svg+xml' },
-    ],
+    apple: { url: '/apple-icon.png', sizes: '180x180' },
   },
-}
+  manifest: '/manifest.json',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#121212' },
+  ],
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/logo.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/logo.svg" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        
-        {/* Preload critical assets */}
-        <link rel="preload" href="/logo.svg" as="image" type="image/svg+xml" />
-        
-        {/* Early ad blocker detection */}
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <script src="/early-detector.js" async></script>
       </head>
-      <body className={`${inter.className} bg-light dark:bg-dark min-h-screen`}>
+      <body className={`${inter.className} bg-light dark:bg-dark min-h-screen flex flex-col`}>
         <ThemeProvider>
-          <LoadingScreen />
-          <div className="fixed inset-0 overflow-hidden z-[-1]">
-            <MotionBackground />
-          </div>
-          
-          {/* Side Banners */}
-          <SideBanner position="left" />
-          <SideBanner position="right" />
-          
-          <div className="flex flex-col min-h-screen relative z-0">
+          <NotificationProvider>
+            <LoadingScreen />
+            <div className="fixed inset-0 overflow-hidden z-[-1]">
+              <div className="absolute inset-0 bg-gradient-to-br from-light to-white dark:from-dark dark:to-gray-900"></div>
+              <div className="absolute inset-0 opacity-20 dark:opacity-40">
+                <div className="absolute top-[10%] left-[15%] w-64 h-64 bg-primary/20 rounded-full filter blur-3xl"></div>
+                <div className="absolute top-[40%] right-[15%] w-72 h-72 bg-secondary/20 rounded-full filter blur-3xl"></div>
+                <div className="absolute bottom-[10%] left-[35%] w-80 h-80 bg-accent/20 rounded-full filter blur-3xl"></div>
+              </div>
+            </div>
+            <AdBlockDetector />
             <Header />
-            <main className="flex-grow pt-24">{children}</main>
-            <div className="container mx-auto px-4 py-6">
-              <AdBanner className="max-w-2xl mx-auto" />
+            <div className="flex-grow flex">
+              <div className="hidden lg:block w-[160px] xl:w-[200px]">
+                <SideBanner />
+              </div>
+              <div className="flex-grow">
+                {children}
+              </div>
+              <div className="hidden lg:block w-[160px] xl:w-[200px]">
+                <SideBanner />
+              </div>
             </div>
             <Footer />
-          </div>
-          <AdBlockDetector />
+          </NotificationProvider>
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 } 

@@ -2,12 +2,12 @@
 
 import React from 'react';
 
-interface SideBannerProps {
-  position: 'left' | 'right';
+export interface SideBannerProps {
+  position?: 'left' | 'right';
   className?: string;
 }
 
-const SideBanner: React.FC<SideBannerProps> = ({ position, className = '' }) => {
+const SideBanner: React.FC<SideBannerProps> = ({ position = 'left', className = '' }) => {
   // Ad script as a string
   const adScript = `
     <script type="text/javascript">
@@ -23,16 +23,14 @@ const SideBanner: React.FC<SideBannerProps> = ({ position, className = '' }) => 
   `;
 
   return (
-    <div 
-      className={`side-banner fixed ${position === 'left' ? 'left-2' : 'right-2'} top-1/2 transform -translate-y-1/2 z-20 hidden lg:block ${className}`}
-      style={{ 
-        height: '600px', 
-        width: '160px',
-        background: 'rgba(255, 255, 255, 0.05)',
-        borderRadius: '4px'
-      }}
-      dangerouslySetInnerHTML={{ __html: adScript }}
-    />
+    <div className={`sticky top-24 h-[calc(100vh-96px)] p-2 ${className}`}>
+      <div className="w-full h-full bg-white/50 dark:bg-gray-800/50 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-2 flex flex-col items-center justify-center">
+        <div className="text-xs text-gray-500 dark:text-gray-400 text-center mb-2">Advertisement</div>
+        <div className="w-full h-full bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
+          <span className="text-gray-400 dark:text-gray-500 text-xs">Ad Space</span>
+        </div>
+      </div>
+    </div>
   );
 };
 

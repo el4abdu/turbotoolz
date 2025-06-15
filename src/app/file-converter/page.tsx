@@ -4,25 +4,30 @@ import React, { useState, useRef, ChangeEvent, DragEvent } from 'react';
 import Card from '@/components/Card';
 import AdBanner from '@/components/AdBanner';
 import Button from '@/components/Button';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { 
   conversionOptions, 
   detectFileType, 
   getAcceptString, 
   formatFileSize,
+  convertFile,
   ConversionType, 
   FormatOption,
   ConversionOption
 } from '@/utils/fileUtils';
+import { useNotification } from '@/components/NotificationContainer';
 
 type FileFormat = string;
 
 export default function FileConverterPage() {
+  const { showNotification, showSuccess, showError } = useNotification();
   const [selectedType, setSelectedType] = useState<ConversionType | null>(null);
   const [fromFormat, setFromFormat] = useState<FileFormat>('');
   const [toFormat, setToFormat] = useState<FileFormat>('');
   const [file, setFile] = useState<File | null>(null);
   const [isConverting, setIsConverting] = useState(false);
   const [convertedFileUrl, setConvertedFileUrl] = useState<string | null>(null);
+  const [conversionPreview, setConversionPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -34,6 +39,7 @@ export default function FileConverterPage() {
     setToFormat('');
     setFile(null);
     setConvertedFileUrl(null);
+    setConversionPreview(null);
     setError(null);
   };
 
@@ -48,6 +54,7 @@ export default function FileConverterPage() {
     setFile(selectedFile);
     setError(null);
     setConvertedFileUrl(null);
+    setConversionPreview(null);
     
     // Auto-detect file type and format
     const { type, format } = detectFileType(selectedFile);
@@ -106,19 +113,40 @@ export default function FileConverterPage() {
 
     setIsConverting(true);
     setError(null);
+    setConversionPreview(null);
 
     try {
-      // In a real application, we would send the file to a backend service
-      // For this demo, we'll simulate a conversion with a timeout
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Create a fake converted file URL
-      // In a real app, this would be the URL to the converted file from the server
-      const fakeConvertedUrl = URL.createObjectURL(file);
-      setConvertedFileUrl(fakeConvertedUrl);
+      // Use our conversion utility
+      const convertedBlob = await convertFile(file, fromFormat, toFormat);
+      
+      if (!convertedBlob) {
+        throw new Error('Conversion failed');
+      }
+      
+      // Create a URL for the converted file
+      const convertedUrl = URL.createObjectURL(convertedBlob);
+      setConvertedFileUrl(convertedUrl);
+      
+      // If it's a text file, show a preview
+      if (toFormat === 'txt') {
+        const text = await convertedBlob.text();
+        setConversionPreview(text.slice(0, 1000) + (text.length > 1000 ? '...' : ''));
+      }
+      
+      // Show success notification
+      showSuccess(
+        'Conversion Complete', 
+        `Successfully converted ${file.name} from ${fromFormat.toUpperCase()} to ${toFormat.toUpperCase()}`
+      );
     } catch (err) {
       setError('An error occurred during conversion. Please try again.');
       console.error('Conversion error:', err);
+      
+      // Show error notification
+      showError(
+        'Conversion Failed', 
+        err instanceof Error ? err.message : 'An error occurred during conversion'
+      );
     } finally {
       setIsConverting(false);
     }
@@ -132,6 +160,14 @@ export default function FileConverterPage() {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+      
+      // Show download notification
+      showNotification({
+        type: 'info',
+        title: 'Download Started',
+        message: `Your converted ${toFormat.toUpperCase()} file is being downloaded`,
+        duration: 3000
+      });
     }
   };
 
@@ -328,6 +364,16 @@ export default function FileConverterPage() {
                   <h3 className="text-xl font-bold text-dark dark:text-light mb-2">Conversion Complete!</h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-6">Your file has been successfully converted.</p>
                   
+                  {/* Preview for text files */}
+                  {conversionPreview && (
+                    <div className="w-full mb-6">
+                      <h4 className="text-lg font-semibold text-dark dark:text-light mb-2">Preview:</h4>
+                      <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-auto max-h-60 font-mono text-sm whitespace-pre-wrap">
+                        {conversionPreview}
+                      </div>
+                    </div>
+                  )}
+                  
                   <Button onClick={handleDownload} variant="primary" className="mb-4">
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -335,7 +381,10 @@ export default function FileConverterPage() {
                     Download Converted File
                   </Button>
                   
-                  <Button onClick={() => setConvertedFileUrl(null)} variant="ghost">
+                  <Button onClick={() => {
+                    setConvertedFileUrl(null);
+                    setConversionPreview(null);
+                  }} variant="ghost">
                     Convert Another File
                   </Button>
                 </div>

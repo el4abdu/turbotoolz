@@ -233,8 +233,8 @@ export default function QRCodePage() {
                         />
                       </div>
                     )}
-                  </div>
-                  
+            </div>
+            
                   <div className="w-full flex flex-col gap-4">
                     <div className="flex gap-2">
                       <Button 
@@ -440,7 +440,7 @@ export default function QRCodePage() {
                     </div>
                     
                     {/* Error Correction */}
-                    <div>
+                      <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Error Correction Level
                       </label>
@@ -474,7 +474,7 @@ export default function QRCodePage() {
                         Include Margin
                       </label>
                     </div>
-                  </div>
+                      </div>
                   
                   <Button 
                     variant="primary" 

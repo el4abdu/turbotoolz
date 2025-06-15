@@ -191,4 +191,99 @@ export const formatFileSize = (bytes: number): string => {
   else if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
   else if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
   else return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+};
+
+/**
+ * Convert a PDF file to text using PDF.js
+ * @param file PDF file to convert
+ * @returns Promise resolving to the extracted text
+ */
+export const convertPdfToText = async (file: File): Promise<string> => {
+  try {
+    // Check if it's actually a PDF
+    if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
+      throw new Error('Not a PDF file');
+    }
+    
+    // Load PDF.js dynamically
+    const pdfjsLib = await import('pdfjs-dist');
+    
+    // Set worker source (needed for PDF.js to work)
+    // Use CDN worker instead of local import to avoid build issues
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '//cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    
+    // Read the file
+    const arrayBuffer = await file.arrayBuffer();
+    const typedArray = new Uint8Array(arrayBuffer);
+    
+    // Load the PDF document
+    const loadingTask = pdfjsLib.getDocument({ data: typedArray });
+    const pdfDocument = await loadingTask.promise;
+    
+    // Get total number of pages
+    const numPages = pdfDocument.numPages;
+    let fullText = `Extracted text from ${file.name}\n\n`;
+    
+    // Extract text from each page
+    for (let i = 1; i <= numPages; i++) {
+      const page = await pdfDocument.getPage(i);
+      const textContent = await page.getTextContent();
+      
+      // Join all the text items
+      const pageText = textContent.items
+        .map((item: any) => item.str)
+        .join(' ');
+      
+      fullText += `--- Page ${i} ---\n${pageText}\n\n`;
+    }
+    
+    return fullText;
+  } catch (error) {
+    console.error('Error converting PDF to text:', error);
+    
+    // Return a more user-friendly error message
+    if (error instanceof Error) {
+      if (error.message.includes('worker')) {
+        return 'Error: PDF.js worker could not be loaded. Please try again.';
+      } else if (error.message.includes('PDF')) {
+        return 'Error: The file appears to be corrupted or not a valid PDF.';
+      }
+      return `Error converting PDF to text: ${error.message}`;
+    }
+    
+    return 'Error converting PDF to text. Please try again.';
+  }
+};
+
+/**
+ * Convert file from one format to another
+ * @param file File to convert
+ * @param fromFormat Source format
+ * @param toFormat Target format
+ * @returns Promise resolving to the converted file or blob
+ */
+export const convertFile = async (
+  file: File,
+  fromFormat: string,
+  toFormat: string
+): Promise<Blob | null> => {
+  try {
+    // Special case for PDF to TXT conversion
+    if (fromFormat === 'pdf' && toFormat === 'txt') {
+      const text = await convertPdfToText(file);
+      return new Blob([text], { type: 'text/plain' });
+    }
+    
+    // For other conversions, we would implement specific conversion logic
+    // For this demo, we'll just return the original file
+    console.log(`Converting ${fromFormat} to ${toFormat}`);
+    
+    // Simulate conversion time
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    return file;
+  } catch (error) {
+    console.error('Conversion error:', error);
+    return null;
+  }
 }; 
