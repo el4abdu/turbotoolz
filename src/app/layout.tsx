@@ -55,17 +55,8 @@ export default function RootLayout({
           </div>
           
           {/* Side Banners */}
-          <div className="fixed left-0 top-0 h-full z-30 pointer-events-none">
-            <div className="h-full flex items-center pointer-events-auto">
-              <SideBanner position="left" className="ml-2" />
-            </div>
-          </div>
-          
-          <div className="fixed right-0 top-0 h-full z-30 pointer-events-none">
-            <div className="h-full flex items-center pointer-events-auto">
-              <SideBanner position="right" className="mr-2" />
-            </div>
-          </div>
+          <SideBanner position="left" />
+          <SideBanner position="right" />
           
           <div className="flex flex-col min-h-screen relative z-0">
             <Header />
