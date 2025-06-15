@@ -110,6 +110,18 @@ const Header = () => {
                 </Link>
               </li>
               <li>
+                <Link 
+                  href="/speed-test" 
+                  className="text-dark dark:text-light hover:text-primary dark:hover:text-primary transition-colors relative group py-2"
+                >
+                  Speed Test
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+                  <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-accent text-white">
+                    Soon
+                  </span>
+                </Link>
+              </li>
+              <li>
                 <ThemeToggle />
               </li>
             </ul>
@@ -191,6 +203,18 @@ const Header = () => {
                 Password Generator
                 <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white">
                   New
+                </span>
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/speed-test" 
+                className="block text-dark dark:text-light hover:text-primary dark:hover:text-primary transition-colors py-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Speed Test
+                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-accent text-white">
+                  Soon
                 </span>
               </Link>
             </li>

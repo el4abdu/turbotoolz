@@ -11,6 +11,19 @@ import AdBanner from '@/components/AdBanner';
 import QRCodeIcon from '@/components/icons/QRCodeIcon';
 import PasswordIcon from '@/components/icons/PasswordIcon';
 
+// Create a SpeedTestIcon component
+const SpeedTestIcon = ({ className = "w-6 h-6" }) => {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 4V2M12 22V20M20 12H22M2 12H4M19.07 5L17.66 6.41M6.34 17.66L4.93 19.07M18.36 18.36L19.78 19.78M4.22 4.22L5.64 5.64" 
+        stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M12 17C14.7614 17 17 14.7614 17 12C17 9.23858 14.7614 7 12 7C9.23858 7 7 9.23858 7 12C7 14.7614 9.23858 17 12 17Z" 
+        stroke="currentColor" strokeWidth="2" />
+      <path d="M12 12L15 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+};
+
 export default function Home() {
   const { theme } = useTheme();
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -79,7 +92,7 @@ export default function Home() {
                     <h2 className="text-2xl font-bold text-dark dark:text-light mb-4">TurboToolz</h2>
                     <p className="text-gray-600 dark:text-gray-400 mb-6">Your toolbox for the web</p>
                     
-                    <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="grid grid-cols-3 gap-4 mb-6">
                       <Link href="/qr-code" className="bg-primary/10 dark:bg-primary/20 p-4 rounded-xl flex items-center justify-center transform transition-transform hover:scale-105 cursor-pointer">
                         <div className="w-16 h-16 bg-primary/20 dark:bg-primary/30 rounded-lg flex items-center justify-center">
                           <QRCodeIcon className="w-10 h-10 text-primary" />
@@ -90,9 +103,14 @@ export default function Home() {
                           <PasswordIcon className="w-10 h-10 text-secondary" />
                         </div>
                       </Link>
+                      <Link href="/speed-test" className="bg-accent/10 dark:bg-accent/20 p-4 rounded-xl flex items-center justify-center transform transition-transform hover:scale-105 cursor-pointer">
+                        <div className="w-16 h-16 bg-accent/20 dark:bg-accent/30 rounded-lg flex items-center justify-center">
+                          <SpeedTestIcon className="w-10 h-10 text-accent" />
+                        </div>
+                      </Link>
                     </div>
                     
-                    <div className="bg-accent/10 dark:bg-accent/20 p-3 rounded-lg text-center transform transition-transform hover:scale-105 cursor-pointer">
+                    <div className="bg-gray-100/30 dark:bg-gray-800/30 p-3 rounded-lg text-center transform transition-transform hover:scale-105 cursor-pointer">
                       <p className="text-sm text-dark dark:text-light">More tools coming soon!</p>
                     </div>
                   </div>
@@ -129,7 +147,7 @@ export default function Home() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* QR Code Generator Card */}
             <Card variant="glass" className="p-8 animate-on-scroll slide-up delay-100 backdrop-blur-md hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1">
               <div className="flex flex-col items-center text-center mb-6">
@@ -211,6 +229,47 @@ export default function Home() {
               
               <Button href="/password-generator" variant="secondary" className="w-full hover:scale-105 transition-transform">Try Password Generator</Button>
             </Card>
+            
+            {/* Speed Test Card */}
+            <Card variant="glass" className="p-8 animate-on-scroll slide-up delay-300 backdrop-blur-md hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1">
+              <div className="flex flex-col items-center text-center mb-6">
+                <div className="w-20 h-20 bg-accent/20 dark:bg-accent/30 rounded-xl flex items-center justify-center mb-4">
+                  <SpeedTestIcon className="w-12 h-12 text-accent" />
+                </div>
+                <h3 className="text-2xl font-bold text-dark dark:text-light mb-2 flex items-center">
+                  Internet Speed Test
+                  <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-accent text-white animate-pulse">
+                    Soon
+                  </span>
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 max-w-md">
+                  Test your internet connection speed with our fast and accurate tool.
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="bg-white/30 dark:bg-dark/30 p-4 rounded-lg">
+                  <div className="flex items-center mb-2">
+                    <svg className="w-5 h-5 text-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span className="font-medium text-dark dark:text-light">Accurate</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Get precise measurements of your connection</p>
+                </div>
+                <div className="bg-white/30 dark:bg-dark/30 p-4 rounded-lg">
+                  <div className="flex items-center mb-2">
+                    <svg className="w-5 h-5 text-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span className="font-medium text-dark dark:text-light">Detailed</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Download, upload, ping, and jitter</p>
+                </div>
+              </div>
+              
+              <Button href="/speed-test" variant="accent" className="w-full hover:scale-105 transition-transform">Try Speed Test</Button>
+            </Card>
           </div>
           
           {/* Second Ad Banner */}
@@ -235,7 +294,8 @@ export default function Home() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button href="/qr-code" variant="primary" size="lg" className="hover:scale-105 transition-transform">Get Started with QR Codes</Button>
-              <Button href="/password-generator" variant="accent" size="lg" className="hover:scale-105 transition-transform">Try Password Generator</Button>
+              <Button href="/password-generator" variant="secondary" size="lg" className="hover:scale-105 transition-transform">Try Password Generator</Button>
+              <Button href="/speed-test" variant="accent" size="lg" className="hover:scale-105 transition-transform">Test Your Internet Speed</Button>
             </div>
           </Card>
         </div>
