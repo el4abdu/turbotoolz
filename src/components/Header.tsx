@@ -92,8 +92,8 @@ const Header = () => {
                 >
                   QR Code
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
-                  <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-accent text-white">
-                    Soon
+                  <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white">
+                    New
                   </span>
                 </Link>
               </li>
@@ -177,8 +177,8 @@ const Header = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 QR Code
-                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-accent text-white">
-                  Soon
+                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white">
+                  New
                 </span>
               </Link>
             </li>
