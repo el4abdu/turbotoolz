@@ -54,7 +54,15 @@ export default function RootLayout({
           </div>
           <div className="flex flex-col min-h-screen relative z-0">
             <Header />
-            <main className="flex-grow pt-24">{children}</main>
+            {/* Top Ad Banner - appears on every page */}
+            <div className="container mx-auto px-4 py-2 mt-20">
+              <AdBanner className="max-w-2xl mx-auto" />
+            </div>
+            <main className="flex-grow pt-4">{children}</main>
+            {/* Middle Ad Banner - appears on every page */}
+            <div className="container mx-auto px-4 py-4">
+              <AdBanner className="max-w-2xl mx-auto" />
+            </div>
             <div className="container mx-auto px-4 py-6">
               <AdBanner className="max-w-2xl mx-auto" />
             </div>
