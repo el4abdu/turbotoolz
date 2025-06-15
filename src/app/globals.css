@@ -193,7 +193,7 @@ body {
 /* Side banner responsive layout */
 @media (min-width: 1024px) {
   .container {
-    max-width: calc(100% - 340px);
+    max-width: calc(100% - 368px);
     margin-left: auto;
     margin-right: auto;
   }

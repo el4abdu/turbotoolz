@@ -7,14 +7,18 @@ interface SideBannerProps {
   className?: string;
 }
 
-const SideBanner: React.FC<SideBannerProps> = ({ position, className = '' }) => {
-  const adContainerRef = useRef<HTMLDivElement>(null);
-
+// Custom hook to inject ad scripts
+function useAdScript(containerRef: React.RefObject<HTMLDivElement>) {
   useEffect(() => {
-    // Create script elements
-    const scriptConfig = document.createElement('script');
-    scriptConfig.type = 'text/javascript';
-    scriptConfig.text = `
+    if (!containerRef.current) return;
+
+    // Clear any existing content
+    containerRef.current.innerHTML = '';
+    
+    // Create and append the configuration script
+    const configScript = document.createElement('script');
+    configScript.type = 'text/javascript';
+    configScript.innerHTML = `
       atOptions = {
         'key' : '6a209abd4de3c48844b48237dcb10858',
         'format' : 'iframe',
@@ -23,45 +27,43 @@ const SideBanner: React.FC<SideBannerProps> = ({ position, className = '' }) => 
         'params' : {}
       };
     `;
-
-    const scriptInvoke = document.createElement('script');
-    scriptInvoke.type = 'text/javascript';
-    scriptInvoke.src = '//www.highperformanceformat.com/6a209abd4de3c48844b48237dcb10858/invoke.js';
-    scriptInvoke.async = true;
-
-    // Append scripts to the container
-    if (adContainerRef.current) {
-      adContainerRef.current.appendChild(scriptConfig);
-      adContainerRef.current.appendChild(scriptInvoke);
-    }
-
+    containerRef.current.appendChild(configScript);
+    
+    // Create and append the invoke script
+    const invokeScript = document.createElement('script');
+    invokeScript.type = 'text/javascript';
+    invokeScript.src = '//www.highperformanceformat.com/6a209abd4de3c48844b48237dcb10858/invoke.js';
+    containerRef.current.appendChild(invokeScript);
+    
     // Cleanup function
     return () => {
-      if (adContainerRef.current) {
-        if (scriptConfig.parentNode === adContainerRef.current) {
-          adContainerRef.current.removeChild(scriptConfig);
-        }
-        if (scriptInvoke.parentNode === adContainerRef.current) {
-          adContainerRef.current.removeChild(scriptInvoke);
-        }
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
       }
     };
-  }, []);
+  }, [containerRef]);
+}
+
+const SideBanner: React.FC<SideBannerProps> = ({ position, className = '' }) => {
+  const adContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Use the custom hook to inject ad scripts
+  useAdScript(adContainerRef);
 
   return (
     <div 
-      ref={adContainerRef} 
-      className={`side-banner fixed ${position === 'left' ? 'left-4' : 'right-4'} top-1/2 transform -translate-y-1/2 z-20 hidden lg:flex items-center justify-center ${className}`}
+      className={`side-banner hidden lg:block ${className}`}
       style={{ 
-        minHeight: '600px', 
+        height: '600px', 
         width: '160px',
         background: 'rgba(255, 255, 255, 0.1)',
         backdropFilter: 'blur(5px)',
         borderRadius: '8px',
         padding: '4px'
       }}
-      data-ad-slot="true"
-    />
+    >
+      <div ref={adContainerRef} className="w-full h-full" />
+    </div>
   );
 };
 
