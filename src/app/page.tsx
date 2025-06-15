@@ -8,6 +8,8 @@ import Image from 'next/image';
 import { useTheme } from '@/components/ThemeProvider';
 import AdPlaceholder from '@/components/AdPlaceholder';
 import AdBanner from '@/components/AdBanner';
+import QRCodeIcon from '@/components/icons/QRCodeIcon';
+import PasswordIcon from '@/components/icons/PasswordIcon';
 
 export default function Home() {
   const { theme } = useTheme();
@@ -78,16 +80,16 @@ export default function Home() {
                     <p className="text-gray-600 dark:text-gray-400 mb-6">Your toolbox for the web</p>
                     
                     <div className="grid grid-cols-2 gap-4 mb-6">
-                      <div className="bg-primary/10 dark:bg-primary/20 p-4 rounded-xl flex items-center justify-center transform transition-transform hover:scale-105 cursor-pointer">
+                      <Link href="/qr-code" className="bg-primary/10 dark:bg-primary/20 p-4 rounded-xl flex items-center justify-center transform transition-transform hover:scale-105 cursor-pointer">
                         <div className="w-16 h-16 bg-primary/20 dark:bg-primary/30 rounded-lg flex items-center justify-center">
-                          <span className="text-primary text-2xl font-bold">QR</span>
+                          <QRCodeIcon className="w-10 h-10 text-primary" />
                         </div>
-                      </div>
-                      <div className="bg-secondary/10 dark:bg-secondary/20 p-4 rounded-xl flex items-center justify-center transform transition-transform hover:scale-105 cursor-pointer">
+                      </Link>
+                      <Link href="/password-generator" className="bg-secondary/10 dark:bg-secondary/20 p-4 rounded-xl flex items-center justify-center transform transition-transform hover:scale-105 cursor-pointer">
                         <div className="w-16 h-16 bg-secondary/20 dark:bg-secondary/30 rounded-lg flex items-center justify-center">
-                          <span className="text-secondary text-2xl font-bold">PW</span>
+                          <PasswordIcon className="w-10 h-10 text-secondary" />
                         </div>
-                      </div>
+                      </Link>
                     </div>
                     
                     <div className="bg-accent/10 dark:bg-accent/20 p-3 rounded-lg text-center transform transition-transform hover:scale-105 cursor-pointer">
@@ -129,87 +131,85 @@ export default function Home() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* QR Code Generator Card */}
-            <Card variant="glass" className="p-6 animate-on-scroll slide-up delay-100 backdrop-blur-md hover:shadow-xl transition-all duration-500 transform hover:-translate-y-1">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-primary/20 dark:bg-primary/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-primary text-xl font-bold">QR</span>
+            <Card variant="glass" className="p-8 animate-on-scroll slide-up delay-100 backdrop-blur-md hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1">
+              <div className="flex flex-col items-center text-center mb-6">
+                <div className="w-20 h-20 bg-primary/20 dark:bg-primary/30 rounded-xl flex items-center justify-center mb-4">
+                  <QRCodeIcon className="w-12 h-12 text-primary" />
                 </div>
-                <div>
-                  <h3 className="text-xl font-bold text-dark dark:text-light mb-2 flex items-center">
-                    QR Code Generator
-                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-accent text-white animate-pulse">
-                      Coming Soon
-                    </span>
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    Quickly generate QR codes for URLs, text, contact information, and more. 
-                    Customize colors and download in multiple formats.
-                  </p>
-                  <ul className="space-y-2 mb-6">
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-primary mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span className="text-gray-600 dark:text-gray-400">Generate QR codes from URLs, text, and more</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-primary mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span className="text-gray-600 dark:text-gray-400">Customize colors and styles</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-primary mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span className="text-gray-600 dark:text-gray-400">Download in multiple formats (PNG, SVG, PDF)</span>
-                    </li>
-                  </ul>
-                  <Button href="/qr-code" variant="primary" className="hover:scale-105 transition-transform">Learn more</Button>
+                <h3 className="text-2xl font-bold text-dark dark:text-light mb-2 flex items-center">
+                  QR Code Generator
+                  <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-accent text-white animate-pulse">
+                    Soon
+                  </span>
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 max-w-md">
+                  Quickly generate QR codes for URLs, text, contact information, and more.
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="bg-white/30 dark:bg-dark/30 p-4 rounded-lg">
+                  <div className="flex items-center mb-2">
+                    <svg className="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span className="font-medium text-dark dark:text-light">Multiple Types</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Generate QR codes from URLs, text, and more</p>
+                </div>
+                <div className="bg-white/30 dark:bg-dark/30 p-4 rounded-lg">
+                  <div className="flex items-center mb-2">
+                    <svg className="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span className="font-medium text-dark dark:text-light">Customization</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Customize colors and styles</p>
                 </div>
               </div>
+              
+              <Button href="/qr-code" variant="primary" className="w-full hover:scale-105 transition-transform">Try QR Code Generator</Button>
             </Card>
 
             {/* Password Generator Card */}
-            <Card variant="glass" className="p-6 animate-on-scroll slide-up delay-200 backdrop-blur-md hover:shadow-xl transition-all duration-500 transform hover:-translate-y-1">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-secondary/20 dark:bg-secondary/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-secondary text-xl font-bold">PW</span>
+            <Card variant="glass" className="p-8 animate-on-scroll slide-up delay-200 backdrop-blur-md hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1">
+              <div className="flex flex-col items-center text-center mb-6">
+                <div className="w-20 h-20 bg-secondary/20 dark:bg-secondary/30 rounded-xl flex items-center justify-center mb-4">
+                  <PasswordIcon className="w-12 h-12 text-secondary" />
                 </div>
-                <div>
-                  <h3 className="text-xl font-bold text-dark dark:text-light mb-2 flex items-center">
-                    Password Generator
-                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white animate-pulse">
-                      New
-                    </span>
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    Create strong, secure passwords with customizable options. 
-                    Include special characters, numbers, and control password length.
-                  </p>
-                  <ul className="space-y-2 mb-6">
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-secondary mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span className="text-gray-600 dark:text-gray-400">Generate strong, secure passwords</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-secondary mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span className="text-gray-600 dark:text-gray-400">Customize password length and complexity</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-secondary mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span className="text-gray-600 dark:text-gray-400">Check password strength and security</span>
-                    </li>
-                  </ul>
-                  <Button href="/password-generator" variant="secondary" className="hover:scale-105 transition-transform">Learn more</Button>
+                <h3 className="text-2xl font-bold text-dark dark:text-light mb-2 flex items-center">
+                  Password Generator
+                  <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white animate-pulse">
+                    New
+                  </span>
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 max-w-md">
+                  Create strong, secure passwords with customizable options.
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="bg-white/30 dark:bg-dark/30 p-4 rounded-lg">
+                  <div className="flex items-center mb-2">
+                    <svg className="w-5 h-5 text-secondary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span className="font-medium text-dark dark:text-light">Secure</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Generate strong, secure passwords</p>
+                </div>
+                <div className="bg-white/30 dark:bg-dark/30 p-4 rounded-lg">
+                  <div className="flex items-center mb-2">
+                    <svg className="w-5 h-5 text-secondary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span className="font-medium text-dark dark:text-light">Customizable</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Adjust length and complexity</p>
                 </div>
               </div>
+              
+              <Button href="/password-generator" variant="secondary" className="w-full hover:scale-105 transition-transform">Try Password Generator</Button>
             </Card>
           </div>
           
