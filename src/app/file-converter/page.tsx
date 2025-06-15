@@ -1,26 +1,20 @@
 'use client';
 
-import React, { useState, useRef, ChangeEvent } from 'react';
+import React, { useState, useRef, ChangeEvent, DragEvent } from 'react';
 import Card from '@/components/Card';
 import AdBanner from '@/components/AdBanner';
 import Button from '@/components/Button';
+import { 
+  conversionOptions, 
+  detectFileType, 
+  getAcceptString, 
+  formatFileSize,
+  ConversionType, 
+  FormatOption,
+  ConversionOption
+} from '@/utils/fileUtils';
 
-// Define supported conversion types
-type ConversionType = 'image' | 'document' | 'audio';
 type FileFormat = string;
-
-interface FormatOption {
-  value: string;
-  label: string;
-}
-
-interface ConversionOption {
-  type: ConversionType;
-  name: string;
-  icon: React.ReactNode;
-  fromFormats: FormatOption[];
-  toFormats: FormatOption[];
-}
 
 export default function FileConverterPage() {
   const [selectedType, setSelectedType] = useState<ConversionType | null>(null);
@@ -30,79 +24,9 @@ export default function FileConverterPage() {
   const [isConverting, setIsConverting] = useState(false);
   const [convertedFileUrl, setConvertedFileUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Define conversion options
-  const conversionOptions: ConversionOption[] = [
-    {
-      type: 'image',
-      name: 'Image Converter',
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-        </svg>
-      ),
-      fromFormats: [
-        { value: 'jpg', label: 'JPG' },
-        { value: 'png', label: 'PNG' },
-        { value: 'gif', label: 'GIF' },
-        { value: 'bmp', label: 'BMP' },
-        { value: 'webp', label: 'WebP' },
-        { value: 'svg', label: 'SVG' },
-      ],
-      toFormats: [
-        { value: 'jpg', label: 'JPG' },
-        { value: 'png', label: 'PNG' },
-        { value: 'gif', label: 'GIF' },
-        { value: 'webp', label: 'WebP' },
-        { value: 'svg', label: 'SVG' },
-      ],
-    },
-    {
-      type: 'document',
-      name: 'Document Converter',
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-        </svg>
-      ),
-      fromFormats: [
-        { value: 'pdf', label: 'PDF' },
-        { value: 'docx', label: 'DOCX' },
-        { value: 'doc', label: 'DOC' },
-        { value: 'txt', label: 'TXT' },
-        { value: 'rtf', label: 'RTF' },
-      ],
-      toFormats: [
-        { value: 'pdf', label: 'PDF' },
-        { value: 'docx', label: 'DOCX' },
-        { value: 'txt', label: 'TXT' },
-        { value: 'rtf', label: 'RTF' },
-      ],
-    },
-    {
-      type: 'audio',
-      name: 'Audio Converter',
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-        </svg>
-      ),
-      fromFormats: [
-        { value: 'mp3', label: 'MP3' },
-        { value: 'wav', label: 'WAV' },
-        { value: 'ogg', label: 'OGG' },
-        { value: 'flac', label: 'FLAC' },
-        { value: 'aac', label: 'AAC' },
-      ],
-      toFormats: [
-        { value: 'mp3', label: 'MP3' },
-        { value: 'wav', label: 'WAV' },
-        { value: 'ogg', label: 'OGG' },
-        { value: 'flac', label: 'FLAC' },
-      ],
-    },
-  ];
+  const dropAreaRef = useRef<HTMLLabelElement>(null);
 
   const handleTypeSelect = (type: ConversionType) => {
     setSelectedType(type);
@@ -116,9 +40,61 @@ export default function FileConverterPage() {
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      setFile(selectedFile);
-      setError(null);
-      setConvertedFileUrl(null);
+      processFile(selectedFile);
+    }
+  };
+
+  const processFile = (selectedFile: File) => {
+    setFile(selectedFile);
+    setError(null);
+    setConvertedFileUrl(null);
+    
+    // Auto-detect file type and format
+    const { type, format } = detectFileType(selectedFile);
+    
+    if (type && format) {
+      setSelectedType(type);
+      setFromFormat(format);
+      
+      // Auto-suggest a reasonable target format
+      const option = conversionOptions.find((opt: ConversionOption) => opt.type === type);
+      if (option) {
+        const availableFormats = option.formats.filter((f: FormatOption) => f.value !== format);
+        if (availableFormats.length > 0) {
+          // Select first available format that's different from source
+          setToFormat(availableFormats[0].value);
+        }
+      }
+    } else {
+      setError('Unsupported file type. Please try another file.');
+    }
+  };
+
+  // Drag and drop handlers
+  const handleDragEnter = (e: DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processFile(e.dataTransfer.files[0]);
     }
   };
 
@@ -159,7 +135,12 @@ export default function FileConverterPage() {
     }
   };
 
-  const selectedOption = selectedType ? conversionOptions.find(option => option.type === selectedType) : null;
+  // Get the current conversion option based on selected type
+  const selectedOption = selectedType ? conversionOptions.find((option: ConversionOption) => option.type === selectedType) : null;
+
+  // Get available formats for the selected type
+  const availableFromFormats = selectedOption?.formats || [];
+  const availableToFormats = selectedOption?.formats.filter((format: FormatOption) => format.value !== fromFormat) || [];
 
   return (
     <>
@@ -176,112 +157,135 @@ export default function FileConverterPage() {
               </p>
             </div>
             
-            {/* Conversion Type Selection */}
+            {/* File Upload Section */}
             <Card variant="glass" className="p-6 mb-8 fade-in delay-200">
-              <h2 className="text-xl font-bold text-dark dark:text-light mb-4">Select Conversion Type</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {conversionOptions.map((option) => (
-                  <button
-                    key={option.type}
-                    onClick={() => handleTypeSelect(option.type)}
-                    className={`flex flex-col items-center p-6 rounded-lg transition-all ${
-                      selectedType === option.type
-                        ? 'bg-primary/20 dark:bg-primary/30 border-2 border-primary'
-                        : 'bg-white/50 dark:bg-gray-800/50 border-2 border-transparent hover:bg-gray-100/50 dark:hover:bg-gray-700/50'
-                    }`}
-                  >
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
-                      selectedType === option.type
-                        ? 'bg-primary text-white'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}>
-                      {option.icon}
-                    </div>
-                    <span className="font-medium text-dark dark:text-light">{option.name}</span>
-                  </button>
-                ))}
+              <h2 className="text-xl font-bold text-dark dark:text-light mb-4">Upload Your File</h2>
+              <div className="flex items-center justify-center w-full">
+                <label 
+                  ref={dropAreaRef}
+                  className={`flex flex-col w-full h-40 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+                    isDragging 
+                      ? 'border-primary bg-primary/10 dark:bg-primary/20' 
+                      : 'border-gray-300 dark:border-gray-700 hover:bg-gray-100/50 dark:hover:bg-gray-800/50'
+                  }`}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                >
+                  <div className="flex flex-col items-center justify-center h-full pt-5 pb-6">
+                    {file ? (
+                      <>
+                        <svg className="w-10 h-10 text-primary mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <p className="mb-2 text-sm text-gray-700 dark:text-gray-300 font-medium">{file.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(file.size)}</p>
+                        <p className="mt-2 text-xs text-primary">{selectedType && fromFormat ? `Detected: ${selectedType.toUpperCase()} (${fromFormat.toUpperCase()})` : ''}</p>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-10 h-10 text-gray-500 dark:text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <p className="mb-2 text-sm text-gray-700 dark:text-gray-300">
+                          <span className="font-semibold">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Supports images, documents, and audio files (max 100MB)
+                        </p>
+                      </>
+                    )}
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    onChange={handleFileChange}
+                    accept={getAcceptString(selectedType)}
+                  />
+                </label>
               </div>
             </Card>
             
             {/* Conversion Options */}
-            {selectedType && (
+            {file && (
               <Card variant="neomorphic" className="p-6 mb-8 fade-in delay-300">
                 <h2 className="text-xl font-bold text-dark dark:text-light mb-6">Conversion Options</h2>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  {/* From Format */}
-                  <div>
-                    <label className="block text-gray-700 dark:text-gray-300 mb-2">Convert from:</label>
-                    <select
-                      value={fromFormat}
-                      onChange={(e) => setFromFormat(e.target.value)}
-                      className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      <option value="">Select format</option>
-                      {selectedOption?.fromFormats.map((format) => (
-                        <option key={format.value} value={format.value}>
-                          {format.label}
-                        </option>
+                {/* Conversion Type Selection */}
+                {!selectedType && (
+                  <div className="mb-6">
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">Please select the type of conversion:</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {conversionOptions.map((option: ConversionOption) => (
+                        <button
+                          key={option.type}
+                          onClick={() => handleTypeSelect(option.type)}
+                          className="flex flex-col items-center p-6 rounded-lg transition-all bg-white/50 dark:bg-gray-800/50 border-2 border-transparent hover:bg-gray-100/50 dark:hover:bg-gray-700/50"
+                        >
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                            {option.type === 'image' && (
+                              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                              </svg>
+                            )}
+                            {option.type === 'document' && (
+                              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                              </svg>
+                            )}
+                            {option.type === 'audio' && (
+                              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                              </svg>
+                            )}
+                          </div>
+                          <span className="font-medium text-dark dark:text-light">{option.name}</span>
+                        </button>
                       ))}
-                    </select>
+                    </div>
                   </div>
-                  
-                  {/* To Format */}
-                  <div>
-                    <label className="block text-gray-700 dark:text-gray-300 mb-2">Convert to:</label>
-                    <select
-                      value={toFormat}
-                      onChange={(e) => setToFormat(e.target.value)}
-                      className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary"
-                      disabled={!fromFormat}
-                    >
-                      <option value="">Select format</option>
-                      {selectedOption?.toFormats
-                        .filter((format) => format.value !== fromFormat)
-                        .map((format) => (
+                )}
+                
+                {selectedType && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    {/* From Format */}
+                    <div>
+                      <label className="block text-gray-700 dark:text-gray-300 mb-2">Convert from:</label>
+                      <select
+                        value={fromFormat}
+                        onChange={(e) => setFromFormat(e.target.value)}
+                        className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        <option value="">Select format</option>
+                        {availableFromFormats.map((format: FormatOption) => (
                           <option key={format.value} value={format.value}>
                             {format.label}
                           </option>
                         ))}
-                    </select>
+                      </select>
+                    </div>
+                    
+                    {/* To Format */}
+                    <div>
+                      <label className="block text-gray-700 dark:text-gray-300 mb-2">Convert to:</label>
+                      <select
+                        value={toFormat}
+                        onChange={(e) => setToFormat(e.target.value)}
+                        className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary"
+                        disabled={!fromFormat}
+                      >
+                        <option value="">Select format</option>
+                        {availableToFormats.map((format: FormatOption) => (
+                          <option key={format.value} value={format.value}>
+                            {format.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
-                </div>
-                
-                {/* File Upload */}
-                <div className="mb-6">
-                  <label className="block text-gray-700 dark:text-gray-300 mb-2">Upload file:</label>
-                  <div className="flex items-center justify-center w-full">
-                    <label className="flex flex-col w-full h-32 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-colors">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        {file ? (
-                          <>
-                            <svg className="w-8 h-8 text-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            <p className="text-sm text-gray-700 dark:text-gray-300">{file.name}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                          </>
-                        ) : (
-                          <>
-                            <svg className="w-8 h-8 text-gray-500 dark:text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                            </svg>
-                            <p className="text-sm text-gray-700 dark:text-gray-300">Click to upload or drag and drop</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Max file size: 100MB</p>
-                          </>
-                        )}
-                      </div>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        className="hidden"
-                        onChange={handleFileChange}
-                        accept={fromFormat ? `.${fromFormat}` : undefined}
-                        disabled={!fromFormat || !toFormat}
-                      />
-                    </label>
-                  </div>
-                </div>
+                )}
                 
                 {/* Error Message */}
                 {error && (
@@ -353,6 +357,18 @@ export default function FileConverterPage() {
                 <div className="flex items-start">
                   <span className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-primary mr-4 mt-0.5">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                  </span>
+                  <div>
+                    <h3 className="font-semibold text-dark dark:text-light">Auto-Detection</h3>
+                    <p className="text-gray-600 dark:text-gray-400">Automatically detects file type and suggests appropriate formats</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <span className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-primary mr-4 mt-0.5">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
                     </svg>
                   </span>
@@ -377,24 +393,12 @@ export default function FileConverterPage() {
                 <div className="flex items-start">
                   <span className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-primary mr-4 mt-0.5">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                     </svg>
                   </span>
                   <div>
-                    <h3 className="font-semibold text-dark dark:text-light">Fast Processing</h3>
-                    <p className="text-gray-600 dark:text-gray-400">Quick conversion with optimized algorithms</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <span className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-primary mr-4 mt-0.5">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
-                    </svg>
-                  </span>
-                  <div>
-                    <h3 className="font-semibold text-dark dark:text-light">Cloud Processing</h3>
-                    <p className="text-gray-600 dark:text-gray-400">No software installation required, everything is done in the cloud</p>
+                    <h3 className="font-semibold text-dark dark:text-light">Drag & Drop</h3>
+                    <p className="text-gray-600 dark:text-gray-400">Simply drag and drop files for easy uploading</p>
                   </div>
                 </div>
               </div>
