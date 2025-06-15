@@ -6,23 +6,32 @@ import Button from '@/components/Button';
 import Card from '@/components/Card';
 import AdBanner from '@/components/AdBanner';
 
+// Define types for our content tabs
+type TabType = 'url' | 'text' | 'email' | 'phone' | 'direct';
+type DownloadFormat = 'png' | 'svg';
+
 export default function QRCodePage() {
   // QR Code states
-  const [qrValue, setQrValue] = useState('https://turbotoolz.com');
-  const [qrSize, setQrSize] = useState(200);
-  const [qrFgColor, setQrFgColor] = useState('#000000');
-  const [qrBgColor, setQrBgColor] = useState('#ffffff');
-  const [qrLevel, setQrLevel] = useState('L');
-  const [qrIncludeMargin, setQrIncludeMargin] = useState(true);
+  const [qrValue, setQrValue] = useState<string>('https://turbotoolz.com');
+  const [qrSize, setQrSize] = useState<number>(200);
+  const [qrFgColor, setQrFgColor] = useState<string>('#000000');
+  const [qrBgColor, setQrBgColor] = useState<string>('#ffffff');
+  const [qrLevel, setQrLevel] = useState<'L' | 'M' | 'Q' | 'H'>('Q');
+  const [qrIncludeMargin, setQrIncludeMargin] = useState<boolean>(true);
+  const [isTransparent, setIsTransparent] = useState<boolean>(false);
+  const [logoUrl, setLogoUrl] = useState<string>('');
+  const [showLogo, setShowLogo] = useState<boolean>(false);
+  const [logoSize, setLogoSize] = useState<number>(50);
   
   // Form states
-  const [inputValue, setInputValue] = useState('https://turbotoolz.com');
-  const [activeTab, setActiveTab] = useState('url');
+  const [inputValue, setInputValue] = useState<string>('https://turbotoolz.com');
+  const [activeTab, setActiveTab] = useState<TabType>('url');
   
   // Download functionality
-  const qrRef = useRef(null);
+  const qrRef = useRef<SVGSVGElement | null>(null);
+  const logoInputRef = useRef<HTMLInputElement | null>(null);
   
-  const handleTabChange = (tab) => {
+  const handleTabChange = (tab: TabType): void => {
     setActiveTab(tab);
     
     // Set default values based on tab
@@ -39,6 +48,9 @@ export default function QRCodePage() {
       case 'phone':
         setInputValue('+1234567890');
         break;
+      case 'direct':
+        setInputValue('https://turbotoolz.com');
+        break;
       default:
         setInputValue('');
     }
@@ -46,7 +58,7 @@ export default function QRCodePage() {
     handleGenerateQR();
   };
   
-  const handleGenerateQR = () => {
+  const handleGenerateQR = (): void => {
     let finalValue = inputValue;
     
     // Format value based on type
@@ -64,7 +76,28 @@ export default function QRCodePage() {
     setQrValue(finalValue);
   };
   
-  const downloadQRCode = (format) => {
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Create object URL for the uploaded file
+    const objectUrl = URL.createObjectURL(file);
+    setLogoUrl(objectUrl);
+    setShowLogo(true);
+    
+    // Set error correction to high when using logo
+    setQrLevel('H');
+  };
+  
+  const removeLogo = (): void => {
+    setShowLogo(false);
+    setLogoUrl('');
+    if (logoInputRef.current) {
+      logoInputRef.current.value = '';
+    }
+  };
+  
+  const downloadQRCode = (format: DownloadFormat): void => {
     if (!qrRef.current) return;
     
     const canvas = document.createElement('canvas');
@@ -78,23 +111,67 @@ export default function QRCodePage() {
       canvas.width = qrSize;
       canvas.height = qrSize;
       const ctx = canvas.getContext('2d');
-      ctx.fillStyle = qrBgColor;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, qrSize, qrSize);
+      if (!ctx) return;
       
-      let downloadLink = document.createElement('a');
-      
-      if (format === 'png') {
-        downloadLink.href = canvas.toDataURL('image/png');
-        downloadLink.download = 'qrcode.png';
-      } else if (format === 'svg') {
-        downloadLink.href = svgUrl;
-        downloadLink.download = 'qrcode.svg';
+      // Apply background (transparent or colored)
+      if (!isTransparent) {
+        ctx.fillStyle = qrBgColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      } else {
+        // For transparent background, we don't fill the background
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
       
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
+      // Draw QR code
+      ctx.drawImage(img, 0, 0, qrSize, qrSize);
+      
+      // Draw logo if enabled
+      if (showLogo && logoUrl) {
+        const logoImg = new Image();
+        logoImg.onload = () => {
+          // Calculate logo position (center)
+          const logoX = (canvas.width - logoSize) / 2;
+          const logoY = (canvas.height - logoSize) / 2;
+          
+          // Draw white background for logo
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(logoX - 5, logoY - 5, logoSize + 10, logoSize + 10);
+          
+          // Draw logo
+          ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+          
+          // Create download link
+          let downloadLink = document.createElement('a');
+          
+          if (format === 'png') {
+            downloadLink.href = canvas.toDataURL('image/png');
+            downloadLink.download = 'qrcode.png';
+          } else if (format === 'svg') {
+            downloadLink.href = svgUrl;
+            downloadLink.download = 'qrcode.svg';
+          }
+          
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+        };
+        logoImg.src = logoUrl;
+      } else {
+        // No logo, proceed with download
+        let downloadLink = document.createElement('a');
+        
+        if (format === 'png') {
+          downloadLink.href = canvas.toDataURL('image/png');
+          downloadLink.download = 'qrcode.png';
+        } else if (format === 'svg') {
+          downloadLink.href = svgUrl;
+          downloadLink.download = 'qrcode.svg';
+        }
+        
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      }
     };
     
     img.src = svgUrl;
@@ -120,16 +197,42 @@ export default function QRCodePage() {
               <div className="flex flex-col md:flex-row gap-8">
                 {/* QR Code Display */}
                 <div className="md:w-1/2 flex flex-col items-center justify-center">
-                  <div className="bg-white p-4 rounded-xl shadow-md mb-6 flex items-center justify-center">
+                  <div 
+                    className={`${isTransparent ? 'bg-transparent' : 'bg-white'} p-4 rounded-xl shadow-md mb-6 flex items-center justify-center relative`}
+                    style={{
+                      backgroundImage: isTransparent ? 'url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABZ0RVh0Q3JlYXRpb24gVGltZQAxMC8yOS8xMiKqq3kAAAAcdEVYdFNvZnR3YXJlAEFkb2JlIEZpcmV3b3JrcyBDUzVxteM2AAAAHklEQVQ4jWP8//8/AyWAiYFCMGrAqAGjBowaMGoABQYAAM0ATfTeYNEAAAAASUVORK5CYII=")' : 'none'
+                    }}
+                  >
                     <QRCodeSVG
                       ref={qrRef}
                       value={qrValue}
                       size={qrSize}
                       fgColor={qrFgColor}
-                      bgColor={qrBgColor}
+                      bgColor={isTransparent ? 'transparent' : qrBgColor}
                       level={qrLevel}
                       includeMargin={qrIncludeMargin}
                     />
+                    {showLogo && logoUrl && (
+                      <div 
+                        className="absolute"
+                        style={{
+                          width: `${logoSize}px`,
+                          height: `${logoSize}px`,
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          backgroundColor: '#FFFFFF',
+                          padding: '5px',
+                          borderRadius: '4px'
+                        }}
+                      >
+                        <img 
+                          src={logoUrl} 
+                          alt="Logo" 
+                          style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                        />
+                      </div>
+                    )}
                   </div>
                   
                   <div className="w-full flex flex-col gap-4">
@@ -160,7 +263,7 @@ export default function QRCodePage() {
                   
                   {/* Content Type Tabs */}
                   <div className="mb-6">
-                    <div className="flex border-b border-gray-300 dark:border-gray-700">
+                    <div className="flex border-b border-gray-300 dark:border-gray-700 overflow-x-auto">
                       <button
                         className={`px-4 py-2 ${activeTab === 'url' ? 'border-b-2 border-primary text-primary' : 'text-gray-600 dark:text-gray-400'}`}
                         onClick={() => handleTabChange('url')}
@@ -185,6 +288,12 @@ export default function QRCodePage() {
                       >
                         Phone
                       </button>
+                      <button
+                        className={`px-4 py-2 ${activeTab === 'direct' ? 'border-b-2 border-primary text-primary' : 'text-gray-600 dark:text-gray-400'}`}
+                        onClick={() => handleTabChange('direct')}
+                      >
+                        Direct Link
+                      </button>
                     </div>
                   </div>
                   
@@ -193,7 +302,8 @@ export default function QRCodePage() {
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {activeTab === 'url' ? 'Website URL' : 
                        activeTab === 'text' ? 'Text Content' :
-                       activeTab === 'email' ? 'Email Address' : 'Phone Number'}
+                       activeTab === 'email' ? 'Email Address' :
+                       activeTab === 'phone' ? 'Phone Number' : 'Direct Link URL'}
                     </label>
                     <input
                       type={activeTab === 'email' ? 'email' : 'text'}
@@ -203,9 +313,55 @@ export default function QRCodePage() {
                       placeholder={
                         activeTab === 'url' ? 'https://example.com' : 
                         activeTab === 'text' ? 'Enter your text here' :
-                        activeTab === 'email' ? 'example@email.com' : '+1234567890'
+                        activeTab === 'email' ? 'example@email.com' : 
+                        activeTab === 'phone' ? '+1234567890' :
+                        'https://turbotoolz.com/direct-link'
                       }
                     />
+                    {activeTab === 'direct' && (
+                      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        Direct links open immediately when scanned, without user confirmation
+                      </p>
+                    )}
+                  </div>
+                  
+                  {/* Logo Upload */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Add Logo (Optional)
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        ref={logoInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="w-full text-sm text-gray-600 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                      />
+                      {showLogo && (
+                        <button
+                          onClick={removeLogo}
+                          className="text-red-500 hover:text-red-700 dark:hover:text-red-400"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                    {showLogo && (
+                      <div className="mt-3">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Logo Size: {logoSize}px
+                        </label>
+                        <input
+                          type="range"
+                          min="20"
+                          max="100"
+                          value={logoSize}
+                          onChange={(e) => setLogoSize(parseInt(e.target.value))}
+                          className="w-full"
+                        />
+                      </div>
+                    )}
                   </div>
                   
                   {/* QR Code Options */}
@@ -255,16 +411,32 @@ export default function QRCodePage() {
                             type="color"
                             value={qrBgColor}
                             onChange={(e) => setQrBgColor(e.target.value)}
-                            className="w-10 h-10 rounded border border-gray-300 dark:border-gray-700 mr-2"
+                            disabled={isTransparent}
+                            className={`w-10 h-10 rounded border border-gray-300 dark:border-gray-700 mr-2 ${isTransparent ? 'opacity-50 cursor-not-allowed' : ''}`}
                           />
                           <input
                             type="text"
                             value={qrBgColor}
                             onChange={(e) => setQrBgColor(e.target.value)}
-                            className="flex-1 px-2 py-1 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                            disabled={isTransparent}
+                            className={`flex-1 px-2 py-1 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${isTransparent ? 'opacity-50 cursor-not-allowed' : ''}`}
                           />
                         </div>
                       </div>
+                    </div>
+                    
+                    {/* Transparent Background */}
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="transparentBg"
+                        checked={isTransparent}
+                        onChange={(e) => setIsTransparent(e.target.checked)}
+                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                      />
+                      <label htmlFor="transparentBg" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                        Transparent Background
+                      </label>
                     </div>
                     
                     {/* Error Correction */}
@@ -274,7 +446,7 @@ export default function QRCodePage() {
                       </label>
                       <select
                         value={qrLevel}
-                        onChange={(e) => setQrLevel(e.target.value)}
+                        onChange={(e) => setQrLevel(e.target.value as 'L' | 'M' | 'Q' | 'H')}
                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                       >
                         <option value="L">Low (7%)</option>
@@ -282,6 +454,11 @@ export default function QRCodePage() {
                         <option value="Q">Quartile (25%)</option>
                         <option value="H">High (30%)</option>
                       </select>
+                      {showLogo && qrLevel !== 'H' && (
+                        <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
+                          High error correction recommended when using a logo
+                        </p>
+                      )}
                     </div>
                     
                     {/* Include Margin */}
