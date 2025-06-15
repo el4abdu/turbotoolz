@@ -9,6 +9,7 @@ import MotionBackground from '@/components/MotionBackground';
 import LoadingScreen from '@/components/LoadingScreen';
 import AdBlockDetector from '@/components/AdBlockDetector';
 import AdBanner from '@/components/AdBanner';
+import SideBanner from '@/components/SideBanner';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -52,6 +53,11 @@ export default function RootLayout({
           <div className="fixed inset-0 overflow-hidden z-[-1]">
             <MotionBackground />
           </div>
+          
+          {/* Side Banners */}
+          <SideBanner position="left" className="ml-1" />
+          <SideBanner position="right" className="mr-1" />
+          
           <div className="flex flex-col min-h-screen relative z-0">
             <Header />
             <main className="flex-grow pt-24">{children}</main>
