@@ -16,7 +16,7 @@ const nextConfig = {
     scrollRestoration: true,
   },
   // For Netlify deployment
-  output: 'export',
+  output: 'standalone',
   distDir: 'out',
   trailingSlash: true,
 };
