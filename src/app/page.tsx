@@ -179,8 +179,8 @@ export default function Home() {
                 <div>
                   <h3 className="text-xl font-bold text-dark dark:text-light mb-2 flex items-center">
                     Password Generator
-                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-accent text-white animate-pulse">
-                      Coming Soon
+                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white animate-pulse">
+                      New
                     </span>
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">
