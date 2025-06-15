@@ -1,12 +1,21 @@
 'use client';
 
-import React, { useState, useRef, ChangeEvent } from 'react';
+import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import AdBanner from '@/components/AdBanner';
 import { useNotification } from '@/components/NotificationContainer';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import dynamic from 'next/dynamic';
+import { 
+  exportToCSV, 
+  exportToJSON, 
+  calculateStats, 
+  getUniqueValues, 
+  downloadFile,
+  formatNumber
+} from '@/utils/chartUtils';
+import ChartDownloader from '@/components/charts/ChartDownloader';
 
 // Dynamically import chart components to reduce initial load time
 const BarChart = dynamic(() => import('@/components/charts/BarChart'), { 
@@ -59,6 +68,14 @@ export default function DataVisualizerPage() {
   const [yAxis, setYAxis] = useState<string>('');
   const [colorBy, setColorBy] = useState<string>('');
   const [isConfiguring, setIsConfiguring] = useState(false);
+  
+  // Data analysis state
+  const [dataStats, setDataStats] = useState<any>({});
+  const [selectedColumn, setSelectedColumn] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<'chart' | 'data' | 'stats'>('chart');
+  
+  // Add chartRef to the component
+  const chartRef = useRef<HTMLDivElement>(null);
   
   // Handle file selection
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -262,6 +279,97 @@ export default function DataVisualizerPage() {
     }
   };
   
+  // Calculate data statistics
+  const calculateDataStats = (column: string) => {
+    if (!data.length || !column) return;
+    
+    setSelectedColumn(column);
+    const stats = calculateStats(data, column);
+    const uniqueValues = getUniqueValues(data, column);
+    
+    setDataStats({
+      ...stats,
+      uniqueCount: uniqueValues.length,
+      uniqueValues: uniqueValues.slice(0, 10), // Show only first 10 unique values
+      hasMore: uniqueValues.length > 10
+    });
+  };
+  
+  // Handle data export
+  const handleExport = (format: 'csv' | 'json') => {
+    if (!data.length) return;
+    
+    try {
+      let content = '';
+      let mimeType = '';
+      let fileExtension = '';
+      
+      if (format === 'csv') {
+        content = exportToCSV(data);
+        mimeType = 'text/csv';
+        fileExtension = 'csv';
+      } else {
+        content = exportToJSON(data);
+        mimeType = 'application/json';
+        fileExtension = 'json';
+      }
+      
+      const fileName = `data-export-${new Date().toISOString().slice(0, 10)}.${fileExtension}`;
+      downloadFile(content, fileName, mimeType);
+      
+      showSuccess('Export Complete', `Data successfully exported to ${format.toUpperCase()}`);
+    } catch (error) {
+      console.error('Export error:', error);
+      showError('Export Failed', 'Could not export data. Please try again.');
+    }
+  };
+  
+  // Use effect to calculate initial statistics when data changes
+  useEffect(() => {
+    if (data.length > 0 && yAxis) {
+      calculateDataStats(yAxis);
+    }
+  }, [data, yAxis]);
+  
+  // Add this function to the component to load sample data
+  const loadSampleData = async (sampleName: string) => {
+    try {
+      setIsLoading(true);
+      let response;
+      let parsedData;
+      let fileType;
+      
+      if (sampleName === 'sales') {
+        response = await fetch('/samples/sample-sales.csv');
+        const text = await response.text();
+        parsedData = parseCSV(text);
+        fileType = 'csv';
+      } else if (sampleName === 'population') {
+        response = await fetch('/samples/sample-population.json');
+        const json = await response.json();
+        parsedData = json;
+        fileType = 'json';
+      }
+      
+      if (parsedData && parsedData.length > 0) {
+        setData(parsedData);
+        setColumns(Object.keys(parsedData[0]));
+        setFile({ name: `sample-${sampleName}.${fileType}` } as File);
+        setChartType('bar');
+        setXAxis(Object.keys(parsedData[0])[0]);
+        setYAxis(Object.keys(parsedData[0]).find(col => typeof parsedData[0][col] === 'number') || '');
+        setColorBy('');
+        setIsConfiguring(true);
+        showSuccess('Sample Data Loaded', `Successfully loaded ${sampleName} sample data`);
+      }
+    } catch (error) {
+      console.error('Error loading sample data:', error);
+      showError('Error', 'Failed to load sample data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   return (
     <main className="pt-32 pb-20">
       <div className="container mx-auto px-4">
@@ -323,67 +431,20 @@ export default function DataVisualizerPage() {
           
           {/* Sample Data Section */}
           {!file && (
-            <Card variant="neomorphic" className="p-6 mb-8 fade-in delay-300">
-              <h2 className="text-xl font-bold text-dark dark:text-light mb-4">Or Try Sample Data</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div 
-                  className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 hover:border-primary dark:hover:border-primary cursor-pointer transition-colors"
-                  onClick={async () => {
-                    setIsLoading(true);
-                    try {
-                      const response = await fetch('/sample-data/sales-data.csv');
-                      const text = await response.text();
-                      const file = new File([text], 'sales-data.csv', { type: 'text/csv' });
-                      processFile(file);
-                    } catch (error) {
-                      console.error('Error loading sample data:', error);
-                      showError('Loading Error', 'Failed to load sample data');
-                    } finally {
-                      setIsLoading(false);
-                    }
-                  }}
-                >
-                  <div className="flex items-center mb-3">
-                    <svg className="w-8 h-8 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                    </svg>
-                    <h3 className="text-lg font-semibold text-dark dark:text-light">Sales Data (CSV)</h3>
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">
-                    Monthly sales data by category and region. Perfect for bar and line charts.
-                  </p>
-                </div>
-                
-                <div 
-                  className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 hover:border-primary dark:hover:border-primary cursor-pointer transition-colors"
-                  onClick={async () => {
-                    setIsLoading(true);
-                    try {
-                      const response = await fetch('/sample-data/weather-data.json');
-                      const jsonData = await response.json();
-                      // Extract the data array from the JSON structure
-                      const dataArray = jsonData.data;
-                      const text = JSON.stringify(dataArray);
-                      const file = new File([text], 'weather-data.json', { type: 'application/json' });
-                      processFile(file);
-                    } catch (error) {
-                      console.error('Error loading sample data:', error);
-                      showError('Loading Error', 'Failed to load sample data');
-                    } finally {
-                      setIsLoading(false);
-                    }
-                  }}
-                >
-                  <div className="flex items-center mb-3">
-                    <svg className="w-8 h-8 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
-                    </svg>
-                    <h3 className="text-lg font-semibold text-dark dark:text-light">Weather Data (JSON)</h3>
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">
-                    Daily weather metrics for different cities. Great for scatter plots and line charts.
-                  </p>
-                </div>
+            <Card variant="neomorphic" className="p-6 mb-8 fade-in">
+              <h2 className="text-xl font-bold text-dark dark:text-light mb-4">
+                Sample Data
+              </h2>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                Don't have data to visualize? Try one of our sample datasets:
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Button onClick={() => loadSampleData('sales')} variant="secondary" size="sm">
+                  Sales Data (CSV)
+                </Button>
+                <Button onClick={() => loadSampleData('population')} variant="secondary" size="sm">
+                  Population Data (JSON)
+                </Button>
               </div>
             </Card>
           )}
@@ -469,25 +530,176 @@ export default function DataVisualizerPage() {
           {/* Visualization Result */}
           {file && data.length > 0 && !isConfiguring && (
             <Card variant="neomorphic" className="p-6 mb-8 fade-in">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-dark dark:text-light">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <h2 className="text-xl font-bold text-dark dark:text-light mb-4 md:mb-0">
                   {chartType.charAt(0).toUpperCase() + chartType.slice(1)} Chart
                 </h2>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Button onClick={() => setIsConfiguring(true)} variant="secondary" size="sm">
                     Edit
                   </Button>
+                  <Button onClick={() => setActiveTab('chart')} 
+                    variant={activeTab === 'chart' ? 'primary' : 'ghost'} 
+                    size="sm">
+                    Chart
+                  </Button>
+                  <Button onClick={() => setActiveTab('data')} 
+                    variant={activeTab === 'data' ? 'primary' : 'ghost'} 
+                    size="sm">
+                    Data
+                  </Button>
+                  <Button onClick={() => setActiveTab('stats')} 
+                    variant={activeTab === 'stats' ? 'primary' : 'ghost'} 
+                    size="sm">
+                    Stats
+                  </Button>
                   <Button onClick={resetState} variant="ghost" size="sm">
-                    New Visualization
+                    New
                   </Button>
                 </div>
               </div>
               
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6">
-                <div className="h-80">
-                  {renderChart()}
+              {/* Chart View */}
+              {activeTab === 'chart' && (
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-dark dark:text-light">Chart View</h3>
+                    <ChartDownloader chartRef={chartRef} fileName={`${chartType}-chart`} />
+                  </div>
+                  <div className="h-80" ref={chartRef}>
+                    {renderChart()}
+                  </div>
                 </div>
-              </div>
+              )}
+              
+              {/* Data View */}
+              {activeTab === 'data' && (
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-dark dark:text-light">Data Table</h3>
+                    <div className="flex gap-2">
+                      <Button onClick={() => handleExport('csv')} variant="secondary" size="sm">
+                        Export CSV
+                      </Button>
+                      <Button onClick={() => handleExport('json')} variant="secondary" size="sm">
+                        Export JSON
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="overflow-x-auto max-h-80">
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                      <thead className="bg-gray-50 dark:bg-gray-900">
+                        <tr>
+                          {columns.map((column) => (
+                            <th 
+                              key={column} 
+                              scope="col" 
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+                              onClick={() => calculateDataStats(column)}
+                            >
+                              {column}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        {data.slice(0, 10).map((row, idx) => (
+                          <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-900">
+                            {columns.map((column) => (
+                              <td key={column} className="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
+                                {typeof row[column] === 'number' 
+                                  ? formatNumber(row[column]) 
+                                  : String(row[column])}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {data.length > 10 && (
+                      <div className="text-center py-2 text-sm text-gray-500 dark:text-gray-400">
+                        Showing 10 of {data.length} rows
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {/* Stats View */}
+              {activeTab === 'stats' && (
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+                    <h3 className="text-lg font-semibold text-dark dark:text-light mb-2 md:mb-0">Column Statistics</h3>
+                    <div>
+                      <select
+                        value={selectedColumn}
+                        onChange={(e) => calculateDataStats(e.target.value)}
+                        className="bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-md py-1 px-2 text-sm"
+                      >
+                        {columns.map((column) => (
+                          <option key={column} value={column}>{column}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  
+                  {selectedColumn && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                      <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Count</p>
+                        <p className="text-xl font-semibold text-dark dark:text-light">{dataStats.count}</p>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Unique Values</p>
+                        <p className="text-xl font-semibold text-dark dark:text-light">{dataStats.uniqueCount}</p>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Type</p>
+                        <p className="text-xl font-semibold text-dark dark:text-light">
+                          {typeof data[0][selectedColumn] === 'number' ? 'Numeric' : 'Text'}
+                        </p>
+                      </div>
+                      
+                      {typeof data[0][selectedColumn] === 'number' && (
+                        <>
+                          <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Minimum</p>
+                            <p className="text-xl font-semibold text-dark dark:text-light">{formatNumber(dataStats.min)}</p>
+                          </div>
+                          <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Maximum</p>
+                            <p className="text-xl font-semibold text-dark dark:text-light">{formatNumber(dataStats.max)}</p>
+                          </div>
+                          <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Average</p>
+                            <p className="text-xl font-semibold text-dark dark:text-light">{formatNumber(dataStats.avg)}</p>
+                          </div>
+                          <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Sum</p>
+                            <p className="text-xl font-semibold text-dark dark:text-light">{formatNumber(dataStats.sum)}</p>
+                          </div>
+                        </>
+                      )}
+                      
+                      <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg md:col-span-3">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Sample Values</p>
+                        <div className="flex flex-wrap gap-2">
+                          {dataStats.uniqueValues?.map((value: any, index: number) => (
+                            <span key={index} className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-md text-xs">
+                              {String(value)}
+                            </span>
+                          ))}
+                          {dataStats.hasMore && (
+                            <span className="text-xs text-gray-500 dark:text-gray-400 px-2 py-1">
+                              ... and {dataStats.uniqueCount - 10} more
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
               
               <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
                 <h3 className="text-lg font-semibold text-dark dark:text-light mb-2">Data Summary</h3>

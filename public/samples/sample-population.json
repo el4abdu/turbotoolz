@@ -1,0 +1,107 @@
+[
+  {
+    "country": "United States",
+    "year": 2010,
+    "population": 309321666,
+    "gdp": 14992052727000,
+    "lifeExpectancy": 78.5
+  },
+  {
+    "country": "United States",
+    "year": 2015,
+    "population": 320878310,
+    "gdp": 18036648000000,
+    "lifeExpectancy": 78.9
+  },
+  {
+    "country": "United States",
+    "year": 2020,
+    "population": 329484123,
+    "gdp": 20893746000000,
+    "lifeExpectancy": 77.3
+  },
+  {
+    "country": "China",
+    "year": 2010,
+    "population": 1340968737,
+    "gdp": 6087164527421,
+    "lifeExpectancy": 74.9
+  },
+  {
+    "country": "China",
+    "year": 2015,
+    "population": 1371857279,
+    "gdp": 11015542352468,
+    "lifeExpectancy": 76.1
+  },
+  {
+    "country": "China",
+    "year": 2020,
+    "population": 1402112000,
+    "gdp": 14722730697890,
+    "lifeExpectancy": 77.1
+  },
+  {
+    "country": "India",
+    "year": 2010,
+    "population": 1234281170,
+    "gdp": 1675615335600,
+    "lifeExpectancy": 66.7
+  },
+  {
+    "country": "India",
+    "year": 2015,
+    "population": 1310152403,
+    "gdp": 2103587817040,
+    "lifeExpectancy": 68.3
+  },
+  {
+    "country": "India",
+    "year": 2020,
+    "population": 1380004385,
+    "gdp": 2622983732960,
+    "lifeExpectancy": 69.7
+  },
+  {
+    "country": "Japan",
+    "year": 2010,
+    "population": 128070000,
+    "gdp": 5700098114744,
+    "lifeExpectancy": 82.8
+  },
+  {
+    "country": "Japan",
+    "year": 2015,
+    "population": 127141000,
+    "gdp": 4389475622533,
+    "lifeExpectancy": 83.8
+  },
+  {
+    "country": "Japan",
+    "year": 2020,
+    "population": 125836021,
+    "gdp": 5057758958706,
+    "lifeExpectancy": 84.7
+  },
+  {
+    "country": "Germany",
+    "year": 2010,
+    "population": 81776930,
+    "gdp": 3417094562178,
+    "lifeExpectancy": 80.0
+  },
+  {
+    "country": "Germany",
+    "year": 2015,
+    "population": 81686611,
+    "gdp": 3360549973888,
+    "lifeExpectancy": 80.7
+  },
+  {
+    "country": "Germany",
+    "year": 2020,
+    "population": 83240525,
+    "gdp": 3846413928652,
+    "lifeExpectancy": 81.1
+  }
+] 

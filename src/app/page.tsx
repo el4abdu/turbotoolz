@@ -78,7 +78,7 @@ const tools: Tool[] = [
     description: 'Create beautiful charts and graphs from your data',
     icon: <DataVisualizerIcon className="w-10 h-10" />,
     url: '/data-visualizer',
-    comingSoon: true,
+    isNew: true,
   },
 ];
 
