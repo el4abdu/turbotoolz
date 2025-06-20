@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Card from '@/components/Card';
 import AdBanner from '@/components/AdBanner';
+import Button from '@/components/Button';
 
 export default function CalculatorPage() {
   const [display, setDisplay] = useState('0');
@@ -10,7 +11,7 @@ export default function CalculatorPage() {
   const [operator, setOperator] = useState<string | null>(null);
   const [waitingForSecondOperand, setWaitingForSecondOperand] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
-  const [isScientificMode, setIsScientificMode] = useState(false);
+  const [mode, setMode] = useState<'basic' | 'advanced'>('basic');
 
   const inputDigit = (digit: string) => {
     if (waitingForSecondOperand) {
@@ -131,52 +132,48 @@ export default function CalculatorPage() {
     const value = parseFloat(display);
     setDisplay(String(value / 100));
   };
-
-  // Scientific calculator functions
-  const handleScientificFunction = (func: string) => {
+  
+  // Advanced calculator functions
+  const handleSin = () => {
     const value = parseFloat(display);
-    let result = 0;
-
-    switch (func) {
-      case 'sin':
-        result = Math.sin(value);
-        break;
-      case 'cos':
-        result = Math.cos(value);
-        break;
-      case 'tan':
-        result = Math.tan(value);
-        break;
-      case 'log':
-        result = Math.log10(value);
-        break;
-      case 'ln':
-        result = Math.log(value);
-        break;
-      case 'sqrt':
-        result = Math.sqrt(value);
-        break;
-      case 'square':
-        result = Math.pow(value, 2);
-        break;
-      case 'cube':
-        result = Math.pow(value, 3);
-        break;
-      case 'pi':
-        setDisplay(String(Math.PI));
-        return;
-      case 'e':
-        setDisplay(String(Math.E));
-        return;
-    }
-
-    result = Math.round(result * 1000000) / 1000000; // Handle floating point precision
-    setDisplay(String(result));
-    addToHistory(`${func}(${value}) = ${result}`);
+    setDisplay(String(Math.sin(value)));
   };
-
-  const toggleCalculatorMode = () => {
-    setIsScientificMode(!isScientificMode);
+  
+  const handleCos = () => {
+    const value = parseFloat(display);
+    setDisplay(String(Math.cos(value)));
+  };
+  
+  const handleTan = () => {
+    const value = parseFloat(display);
+    setDisplay(String(Math.tan(value)));
+  };
+  
+  const handleLog = () => {
+    const value = parseFloat(display);
+    setDisplay(String(Math.log10(value)));
+  };
+  
+  const handleLn = () => {
+    const value = parseFloat(display);
+    setDisplay(String(Math.log(value)));
+  };
+  
+  const handlePower = () => {
+    handleOperator('^');
+  };
+  
+  const handleSqrt = () => {
+    const value = parseFloat(display);
+    setDisplay(String(Math.sqrt(value)));
+  };
+  
+  const handlePi = () => {
+    setDisplay(String(Math.PI));
+  };
+  
+  const handleE = () => {
+    setDisplay(String(Math.E));
   };
 
   return (
@@ -187,251 +184,370 @@ export default function CalculatorPage() {
             {/* Hero Section */}
             <div className="text-center mb-12">
               <h1 className="text-4xl md:text-5xl font-bold text-dark dark:text-light mb-6 fade-in">
-                Calculator
+                Advanced Calculator
               </h1>
               <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 fade-in delay-100">
-                A powerful calculator for your everyday needs
+                A powerful calculator with both basic and scientific functions
               </p>
-            </div>
-            
-            {/* Calculator Mode Toggle */}
-            <div className="flex justify-center mb-4 fade-in delay-150">
-              <button 
-                onClick={toggleCalculatorMode}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  isScientificMode 
-                    ? 'bg-primary text-white' 
-                    : 'bg-gray-200 dark:bg-gray-700 text-dark dark:text-light'
-                }`}
-              >
-                {isScientificMode ? 'Scientific Mode' : 'Basic Mode'} - Click to Toggle
-              </button>
             </div>
             
             {/* Calculator */}
             <Card variant="neomorphic" className="mb-8 fade-in delay-200">
+              {/* Mode Switcher */}
+              <div className="flex bg-gray-100 dark:bg-gray-900 p-2 rounded-t-lg">
+                <button
+                  onClick={() => setMode('basic')}
+                  className={`flex-1 py-2 text-center rounded-lg transition-colors ${
+                    mode === 'basic'
+                      ? 'bg-primary text-white font-medium'
+                      : 'bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  Basic
+                </button>
+                <button
+                  onClick={() => setMode('advanced')}
+                  className={`flex-1 py-2 text-center rounded-lg transition-colors ${
+                    mode === 'advanced'
+                      ? 'bg-primary text-white font-medium'
+                      : 'bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  Advanced
+                </button>
+              </div>
+              
               {/* Display */}
-              <div className="bg-white/80 dark:bg-gray-800/80 p-4 rounded-t-lg border-b border-gray-200 dark:border-gray-700">
+              <div className="bg-white/80 dark:bg-gray-800/80 p-4 border-y border-gray-200 dark:border-gray-700">
                 <div className="text-right text-4xl font-mono text-dark dark:text-light overflow-x-auto whitespace-nowrap py-2">
                   {display}
                 </div>
               </div>
               
               {/* Keypad */}
-              <div className="grid grid-cols-4 gap-1 p-2 bg-gray-100 dark:bg-gray-900 rounded-b-lg">
-                {isScientificMode && (
-                  <>
-                    {/* Scientific Functions Row 1 */}
-                    <button 
-                      onClick={() => handleScientificFunction('sin')} 
-                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
-                    >
-                      sin
-                    </button>
-                    <button 
-                      onClick={() => handleScientificFunction('cos')} 
-                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
-                    >
-                      cos
-                    </button>
-                    <button 
-                      onClick={() => handleScientificFunction('tan')} 
-                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
-                    >
-                      tan
-                    </button>
-                    <button 
-                      onClick={() => handleOperator('^')} 
-                      className="bg-primary hover:bg-primary-dark text-white text-xl p-4 rounded-lg transition-colors"
-                    >
-                      x^y
-                    </button>
-                    
-                    {/* Scientific Functions Row 2 */}
-                    <button 
-                      onClick={() => handleScientificFunction('log')} 
-                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
-                    >
-                      log
-                    </button>
-                    <button 
-                      onClick={() => handleScientificFunction('ln')} 
-                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
-                    >
-                      ln
-                    </button>
-                    <button 
-                      onClick={() => handleScientificFunction('sqrt')} 
-                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
-                    >
-                      √
-                    </button>
-                    <button 
-                      onClick={() => handleScientificFunction('square')} 
-                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
-                    >
-                      x²
-                    </button>
-                    
-                    {/* Scientific Functions Row 3 */}
-                    <button 
-                      onClick={() => handleScientificFunction('cube')} 
-                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
-                    >
-                      x³
-                    </button>
-                    <button 
-                      onClick={() => handleScientificFunction('pi')} 
-                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
-                    >
-                      π
-                    </button>
-                    <button 
-                      onClick={() => handleScientificFunction('e')} 
-                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
-                    >
-                      e
-                    </button>
-                    <button 
-                      onClick={() => {}} 
-                      className="bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-dark dark:text-light text-sm p-4 rounded-lg transition-colors opacity-50"
-                      disabled
-                    >
-                      
-                    </button>
-                  </>
-                )}
-                
-                {/* Row 1 */}
-                <button 
-                  onClick={clearDisplay} 
-                  className="bg-red-500 hover:bg-red-600 text-white text-xl font-semibold p-4 rounded-lg transition-colors"
-                >
-                  AC
-                </button>
-                <button 
-                  onClick={handleBackspace} 
-                  className="bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
-                >
-                  ⌫
-                </button>
-                <button 
-                  onClick={handlePercent} 
-                  className="bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
-                >
-                  %
-                </button>
-                <button 
-                  onClick={() => handleOperator('/')} 
-                  className="bg-primary hover:bg-primary-dark text-white text-xl p-4 rounded-lg transition-colors"
-                >
-                  ÷
-                </button>
-                
-                {/* Row 2 */}
-                <button 
-                  onClick={() => inputDigit('7')} 
-                  className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
-                >
-                  7
-                </button>
-                <button 
-                  onClick={() => inputDigit('8')} 
-                  className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
-                >
-                  8
-                </button>
-                <button 
-                  onClick={() => inputDigit('9')} 
-                  className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
-                >
-                  9
-                </button>
-                <button 
-                  onClick={() => handleOperator('*')} 
-                  className="bg-primary hover:bg-primary-dark text-white text-xl p-4 rounded-lg transition-colors"
-                >
-                  ×
-                </button>
-                
-                {/* Row 3 */}
-                <button 
-                  onClick={() => inputDigit('4')} 
-                  className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
-                >
-                  4
-                </button>
-                <button 
-                  onClick={() => inputDigit('5')} 
-                  className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
-                >
-                  5
-                </button>
-                <button 
-                  onClick={() => inputDigit('6')} 
-                  className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
-                >
-                  6
-                </button>
-                <button 
-                  onClick={() => handleOperator('-')} 
-                  className="bg-primary hover:bg-primary-dark text-white text-xl p-4 rounded-lg transition-colors"
-                >
-                  -
-                </button>
-                
-                {/* Row 4 */}
-                <button 
-                  onClick={() => inputDigit('1')} 
-                  className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
-                >
-                  1
-                </button>
-                <button 
-                  onClick={() => inputDigit('2')} 
-                  className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
-                >
-                  2
-                </button>
-                <button 
-                  onClick={() => inputDigit('3')} 
-                  className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
-                >
-                  3
-                </button>
-                <button 
-                  onClick={() => handleOperator('+')} 
-                  className="bg-primary hover:bg-primary-dark text-white text-xl p-4 rounded-lg transition-colors"
-                >
-                  +
-                </button>
-                
-                {/* Row 5 */}
-                <button 
-                  onClick={handlePlusMinus} 
-                  className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
-                >
-                  ±
-                </button>
-                <button 
-                  onClick={() => inputDigit('0')} 
-                  className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
-                >
-                  0
-                </button>
-                <button 
-                  onClick={inputDecimal} 
-                  className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
-                >
-                  .
-                </button>
-                <button 
-                  onClick={handleEquals} 
-                  className="bg-green-500 hover:bg-green-600 text-white text-xl p-4 rounded-lg transition-colors"
-                >
-                  =
-                </button>
-              </div>
+              {mode === 'basic' ? (
+                <div className="grid grid-cols-4 gap-1 p-2 bg-gray-100 dark:bg-gray-900 rounded-b-lg">
+                  {/* Row 1 */}
+                  <button 
+                    onClick={clearDisplay} 
+                    className="bg-red-500 hover:bg-red-600 text-white text-xl font-semibold p-4 rounded-lg transition-colors"
+                  >
+                    AC
+                  </button>
+                  <button 
+                    onClick={handleBackspace} 
+                    className="bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
+                  >
+                    ⌫
+                  </button>
+                  <button 
+                    onClick={handlePercent} 
+                    className="bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
+                  >
+                    %
+                  </button>
+                  <button 
+                    onClick={() => handleOperator('/')} 
+                    className="bg-primary hover:bg-primary-dark text-white text-xl p-4 rounded-lg transition-colors"
+                  >
+                    ÷
+                  </button>
+                  
+                  {/* Row 2 */}
+                  <button 
+                    onClick={() => inputDigit('7')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
+                  >
+                    7
+                  </button>
+                  <button 
+                    onClick={() => inputDigit('8')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
+                  >
+                    8
+                  </button>
+                  <button 
+                    onClick={() => inputDigit('9')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
+                  >
+                    9
+                  </button>
+                  <button 
+                    onClick={() => handleOperator('*')} 
+                    className="bg-primary hover:bg-primary-dark text-white text-xl p-4 rounded-lg transition-colors"
+                  >
+                    ×
+                  </button>
+                  
+                  {/* Row 3 */}
+                  <button 
+                    onClick={() => inputDigit('4')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
+                  >
+                    4
+                  </button>
+                  <button 
+                    onClick={() => inputDigit('5')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
+                  >
+                    5
+                  </button>
+                  <button 
+                    onClick={() => inputDigit('6')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
+                  >
+                    6
+                  </button>
+                  <button 
+                    onClick={() => handleOperator('-')} 
+                    className="bg-primary hover:bg-primary-dark text-white text-xl p-4 rounded-lg transition-colors"
+                  >
+                    -
+                  </button>
+                  
+                  {/* Row 4 */}
+                  <button 
+                    onClick={() => inputDigit('1')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
+                  >
+                    1
+                  </button>
+                  <button 
+                    onClick={() => inputDigit('2')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
+                  >
+                    2
+                  </button>
+                  <button 
+                    onClick={() => inputDigit('3')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
+                  >
+                    3
+                  </button>
+                  <button 
+                    onClick={() => handleOperator('+')} 
+                    className="bg-primary hover:bg-primary-dark text-white text-xl p-4 rounded-lg transition-colors"
+                  >
+                    +
+                  </button>
+                  
+                  {/* Row 5 */}
+                  <button 
+                    onClick={handlePlusMinus} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
+                  >
+                    ±
+                  </button>
+                  <button 
+                    onClick={() => inputDigit('0')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
+                  >
+                    0
+                  </button>
+                  <button 
+                    onClick={inputDecimal} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-xl p-4 rounded-lg transition-colors"
+                  >
+                    .
+                  </button>
+                  <button 
+                    onClick={handleEquals} 
+                    className="bg-green-500 hover:bg-green-600 text-white text-xl p-4 rounded-lg transition-colors"
+                  >
+                    =
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-5 gap-1 p-2 bg-gray-100 dark:bg-gray-900 rounded-b-lg">
+                  {/* Row 1 - Advanced Functions */}
+                  <button 
+                    onClick={handleSin} 
+                    className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-3 rounded-lg transition-colors"
+                  >
+                    sin
+                  </button>
+                  <button 
+                    onClick={handleCos} 
+                    className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-3 rounded-lg transition-colors"
+                  >
+                    cos
+                  </button>
+                  <button 
+                    onClick={handleTan} 
+                    className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-3 rounded-lg transition-colors"
+                  >
+                    tan
+                  </button>
+                  <button 
+                    onClick={handleLog} 
+                    className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-3 rounded-lg transition-colors"
+                  >
+                    log
+                  </button>
+                  <button 
+                    onClick={handleLn} 
+                    className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-3 rounded-lg transition-colors"
+                  >
+                    ln
+                  </button>
+                  
+                  {/* Row 2 - More Advanced Functions */}
+                  <button 
+                    onClick={handlePi} 
+                    className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-3 rounded-lg transition-colors"
+                  >
+                    π
+                  </button>
+                  <button 
+                    onClick={handleE} 
+                    className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-3 rounded-lg transition-colors"
+                  >
+                    e
+                  </button>
+                  <button 
+                    onClick={handlePower} 
+                    className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-3 rounded-lg transition-colors"
+                  >
+                    x^y
+                  </button>
+                  <button 
+                    onClick={handleSqrt} 
+                    className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-3 rounded-lg transition-colors"
+                  >
+                    √x
+                  </button>
+                  <button 
+                    onClick={handlePercent} 
+                    className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-3 rounded-lg transition-colors"
+                  >
+                    %
+                  </button>
+                  
+                  {/* Row 3 - Clear, Backspace, Operations */}
+                  <button 
+                    onClick={clearDisplay} 
+                    className="bg-red-500 hover:bg-red-600 text-white text-sm p-3 rounded-lg transition-colors"
+                  >
+                    AC
+                  </button>
+                  <button 
+                    onClick={handleBackspace} 
+                    className="bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-dark dark:text-light text-sm p-3 rounded-lg transition-colors"
+                  >
+                    ⌫
+                  </button>
+                  <button 
+                    onClick={handlePlusMinus} 
+                    className="bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-dark dark:text-light text-sm p-3 rounded-lg transition-colors"
+                  >
+                    ±
+                  </button>
+                  <button 
+                    onClick={() => handleOperator('/')} 
+                    className="bg-primary hover:bg-primary-dark text-white text-sm p-3 rounded-lg transition-colors"
+                  >
+                    ÷
+                  </button>
+                  <button 
+                    onClick={() => handleOperator('*')} 
+                    className="bg-primary hover:bg-primary-dark text-white text-sm p-3 rounded-lg transition-colors"
+                  >
+                    ×
+                  </button>
+                  
+                  {/* Row 4 - Numbers 7-9 and Operations */}
+                  <button 
+                    onClick={() => inputDigit('7')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-sm p-3 rounded-lg transition-colors"
+                  >
+                    7
+                  </button>
+                  <button 
+                    onClick={() => inputDigit('8')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-sm p-3 rounded-lg transition-colors"
+                  >
+                    8
+                  </button>
+                  <button 
+                    onClick={() => inputDigit('9')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-sm p-3 rounded-lg transition-colors"
+                  >
+                    9
+                  </button>
+                  <button 
+                    onClick={() => handleOperator('-')} 
+                    className="bg-primary hover:bg-primary-dark text-white text-sm p-3 rounded-lg transition-colors"
+                  >
+                    -
+                  </button>
+                  <button 
+                    onClick={() => handleOperator('+')} 
+                    className="bg-primary hover:bg-primary-dark text-white text-sm p-3 rounded-lg transition-colors row-span-2"
+                  >
+                    +
+                  </button>
+                  
+                  {/* Row 5 - Numbers 4-6 */}
+                  <button 
+                    onClick={() => inputDigit('4')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-sm p-3 rounded-lg transition-colors"
+                  >
+                    4
+                  </button>
+                  <button 
+                    onClick={() => inputDigit('5')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-sm p-3 rounded-lg transition-colors"
+                  >
+                    5
+                  </button>
+                  <button 
+                    onClick={() => inputDigit('6')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-sm p-3 rounded-lg transition-colors"
+                  >
+                    6
+                  </button>
+                  <button 
+                    onClick={handleEquals} 
+                    className="bg-green-500 hover:bg-green-600 text-white text-sm p-3 rounded-lg transition-colors row-span-2"
+                  >
+                    =
+                  </button>
+                  
+                  {/* Row 6 - Numbers 1-3 */}
+                  <button 
+                    onClick={() => inputDigit('1')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-sm p-3 rounded-lg transition-colors"
+                  >
+                    1
+                  </button>
+                  <button 
+                    onClick={() => inputDigit('2')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-sm p-3 rounded-lg transition-colors"
+                  >
+                    2
+                  </button>
+                  <button 
+                    onClick={() => inputDigit('3')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-sm p-3 rounded-lg transition-colors"
+                  >
+                    3
+                  </button>
+                  
+                  {/* Row 7 - Zero and Decimal */}
+                  <button 
+                    onClick={() => inputDigit('0')} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-sm p-3 rounded-lg transition-colors col-span-2"
+                  >
+                    0
+                  </button>
+                  <button 
+                    onClick={inputDecimal} 
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-dark dark:text-light text-sm p-3 rounded-lg transition-colors"
+                  >
+                    .
+                  </button>
+                </div>
+              )}
             </Card>
             
             {/* History */}
@@ -518,24 +634,60 @@ export default function CalculatorPage() {
                 <div className="flex items-start">
                   <span className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-primary mr-4 mt-0.5">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                    </svg>
-                  </span>
-                  <div>
-                    <h3 className="font-semibold text-dark dark:text-light">Scientific Mode</h3>
-                    <p className="text-gray-600 dark:text-gray-400">Advanced functions like sin, cos, log, and more</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <span className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-primary mr-4 mt-0.5">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
                     </svg>
                   </span>
                   <div>
                     <h3 className="font-semibold text-dark dark:text-light">Modern Design</h3>
                     <p className="text-gray-600 dark:text-gray-400">Clean interface with light and dark mode support</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <span className="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-500 mr-4 mt-0.5">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+                    </svg>
+                  </span>
+                  <div>
+                    <h3 className="font-semibold text-dark dark:text-light">Mode Switcher</h3>
+                    <p className="text-gray-600 dark:text-gray-400">Switch between basic and advanced calculator modes</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <span className="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-500 mr-4 mt-0.5">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.871 4A17.926 17.926 0 003 12c0 2.874.673 5.59 1.871 8m14.13 0a17.926 17.926 0 001.87-8c0-2.874-.673-5.59-1.87-8M9 9h1.246a1 1 0 01.961.725l1.586 5.55a1 1 0 00.961.725H15m1-7h-.08a2 2 0 00-1.519.698L9.6 15.302A2 2 0 018.08 16H8"></path>
+                    </svg>
+                  </span>
+                  <div>
+                    <h3 className="font-semibold text-dark dark:text-light">Scientific Functions</h3>
+                    <p className="text-gray-600 dark:text-gray-400">Advanced mode with trigonometric and logarithmic functions</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <span className="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-500 mr-4 mt-0.5">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                  </span>
+                  <div>
+                    <h3 className="font-semibold text-dark dark:text-light">Mathematical Constants</h3>
+                    <p className="text-gray-600 dark:text-gray-400">Quick access to π and e constants for precise calculations</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <span className="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-500 mr-4 mt-0.5">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                    </svg>
+                  </span>
+                  <div>
+                    <h3 className="font-semibold text-dark dark:text-light">Power Functions</h3>
+                    <p className="text-gray-600 dark:text-gray-400">Exponents, square roots and other advanced operations</p>
                   </div>
                 </div>
               </div>
