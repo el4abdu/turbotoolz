@@ -10,6 +10,7 @@ export default function CalculatorPage() {
   const [operator, setOperator] = useState<string | null>(null);
   const [waitingForSecondOperand, setWaitingForSecondOperand] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
+  const [isScientificMode, setIsScientificMode] = useState(false);
 
   const inputDigit = (digit: string) => {
     if (waitingForSecondOperand) {
@@ -74,6 +75,9 @@ export default function CalculatorPage() {
       case '/':
         result = firstOperand / inputValue;
         break;
+      case '^':
+        result = Math.pow(firstOperand, inputValue);
+        break;
       default:
         return inputValue;
     }
@@ -128,6 +132,53 @@ export default function CalculatorPage() {
     setDisplay(String(value / 100));
   };
 
+  // Scientific calculator functions
+  const handleScientificFunction = (func: string) => {
+    const value = parseFloat(display);
+    let result = 0;
+
+    switch (func) {
+      case 'sin':
+        result = Math.sin(value);
+        break;
+      case 'cos':
+        result = Math.cos(value);
+        break;
+      case 'tan':
+        result = Math.tan(value);
+        break;
+      case 'log':
+        result = Math.log10(value);
+        break;
+      case 'ln':
+        result = Math.log(value);
+        break;
+      case 'sqrt':
+        result = Math.sqrt(value);
+        break;
+      case 'square':
+        result = Math.pow(value, 2);
+        break;
+      case 'cube':
+        result = Math.pow(value, 3);
+        break;
+      case 'pi':
+        setDisplay(String(Math.PI));
+        return;
+      case 'e':
+        setDisplay(String(Math.E));
+        return;
+    }
+
+    result = Math.round(result * 1000000) / 1000000; // Handle floating point precision
+    setDisplay(String(result));
+    addToHistory(`${func}(${value}) = ${result}`);
+  };
+
+  const toggleCalculatorMode = () => {
+    setIsScientificMode(!isScientificMode);
+  };
+
   return (
     <>
       <main className="pt-32 pb-20">
@@ -143,6 +194,20 @@ export default function CalculatorPage() {
               </p>
             </div>
             
+            {/* Calculator Mode Toggle */}
+            <div className="flex justify-center mb-4 fade-in delay-150">
+              <button 
+                onClick={toggleCalculatorMode}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  isScientificMode 
+                    ? 'bg-primary text-white' 
+                    : 'bg-gray-200 dark:bg-gray-700 text-dark dark:text-light'
+                }`}
+              >
+                {isScientificMode ? 'Scientific Mode' : 'Basic Mode'} - Click to Toggle
+              </button>
+            </div>
+            
             {/* Calculator */}
             <Card variant="neomorphic" className="mb-8 fade-in delay-200">
               {/* Display */}
@@ -154,6 +219,89 @@ export default function CalculatorPage() {
               
               {/* Keypad */}
               <div className="grid grid-cols-4 gap-1 p-2 bg-gray-100 dark:bg-gray-900 rounded-b-lg">
+                {isScientificMode && (
+                  <>
+                    {/* Scientific Functions Row 1 */}
+                    <button 
+                      onClick={() => handleScientificFunction('sin')} 
+                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
+                    >
+                      sin
+                    </button>
+                    <button 
+                      onClick={() => handleScientificFunction('cos')} 
+                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
+                    >
+                      cos
+                    </button>
+                    <button 
+                      onClick={() => handleScientificFunction('tan')} 
+                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
+                    >
+                      tan
+                    </button>
+                    <button 
+                      onClick={() => handleOperator('^')} 
+                      className="bg-primary hover:bg-primary-dark text-white text-xl p-4 rounded-lg transition-colors"
+                    >
+                      x^y
+                    </button>
+                    
+                    {/* Scientific Functions Row 2 */}
+                    <button 
+                      onClick={() => handleScientificFunction('log')} 
+                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
+                    >
+                      log
+                    </button>
+                    <button 
+                      onClick={() => handleScientificFunction('ln')} 
+                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
+                    >
+                      ln
+                    </button>
+                    <button 
+                      onClick={() => handleScientificFunction('sqrt')} 
+                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
+                    >
+                      √
+                    </button>
+                    <button 
+                      onClick={() => handleScientificFunction('square')} 
+                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
+                    >
+                      x²
+                    </button>
+                    
+                    {/* Scientific Functions Row 3 */}
+                    <button 
+                      onClick={() => handleScientificFunction('cube')} 
+                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
+                    >
+                      x³
+                    </button>
+                    <button 
+                      onClick={() => handleScientificFunction('pi')} 
+                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
+                    >
+                      π
+                    </button>
+                    <button 
+                      onClick={() => handleScientificFunction('e')} 
+                      className="bg-indigo-500 hover:bg-indigo-600 text-white text-sm p-4 rounded-lg transition-colors"
+                    >
+                      e
+                    </button>
+                    <button 
+                      onClick={() => {}} 
+                      className="bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-dark dark:text-light text-sm p-4 rounded-lg transition-colors opacity-50"
+                      disabled
+                    >
+                      
+                    </button>
+                  </>
+                )}
+                
                 {/* Row 1 */}
                 <button 
                   onClick={clearDisplay} 
@@ -364,6 +512,18 @@ export default function CalculatorPage() {
                   <div>
                     <h3 className="font-semibold text-dark dark:text-light">Percentage Calculation</h3>
                     <p className="text-gray-600 dark:text-gray-400">Easily calculate percentages with a single button</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <span className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-primary mr-4 mt-0.5">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                  </span>
+                  <div>
+                    <h3 className="font-semibold text-dark dark:text-light">Scientific Mode</h3>
+                    <p className="text-gray-600 dark:text-gray-400">Advanced functions like sin, cos, log, and more</p>
                   </div>
                 </div>
                 
