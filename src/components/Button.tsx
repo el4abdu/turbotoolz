@@ -11,6 +11,7 @@ interface ButtonProps {
   fullWidth?: boolean;
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';
+  as?: React.ElementType;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -23,6 +24,7 @@ const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   disabled = false,
   type = 'button',
+  as: Component,
 }) => {
   // Base styles
   const baseStyles = 'relative inline-flex items-center justify-center rounded-xl font-medium transition-all duration-300 ease-in-out transform focus:outline-none focus:ring-2 focus:ring-offset-2 active:scale-95';
@@ -51,6 +53,22 @@ const Button: React.FC<ButtonProps> = ({
   
   // Combined styles
   const combinedStyles = `${baseStyles} ${sizeStyles[size]} ${variant !== 'custom' ? variantStyles[variant] : ''} ${widthStyle} ${disabledStyles} ${className}`;
+  
+  // Render with custom component if provided
+  if (Component) {
+    return (
+      <Component
+        href={href}
+        className={combinedStyles}
+        onClick={onClick}
+      >
+        <span className="relative z-10">{children}</span>
+        <span className="absolute inset-0 rounded-xl overflow-hidden">
+          <span className="absolute inset-0 transform translate-y-full bg-white/10 transition-transform duration-300 ease-in-out group-hover:translate-y-0"></span>
+        </span>
+      </Component>
+    );
+  }
   
   // Render as link if href is provided
   if (href) {
