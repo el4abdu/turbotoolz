@@ -5,7 +5,7 @@ interface ButtonProps {
   children: React.ReactNode;
   href?: string;
   onClick?: () => void;
-  variant?: 'primary' | 'secondary' | 'accent' | 'ghost' | 'custom';
+  variant?: 'primary' | 'secondary' | 'accent' | 'ghost' | 'outline' | 'custom';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   fullWidth?: boolean;
@@ -42,6 +42,7 @@ const Button: React.FC<ButtonProps> = ({
     secondary: 'bg-secondary hover:bg-secondary/90 text-white focus:ring-secondary/50 shadow-lg shadow-secondary/30 hover:shadow-xl hover:shadow-secondary/40',
     accent: 'bg-accent hover:bg-accent/90 text-white focus:ring-accent/50 shadow-lg shadow-accent/30 hover:shadow-xl hover:shadow-accent/40',
     ghost: 'bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600 focus:ring-gray-400',
+    outline: 'bg-transparent text-primary hover:bg-primary/10 border border-primary focus:ring-primary/50 hover:border-primary-dark',
     custom: '', // Empty string for custom styling via className
   };
   
